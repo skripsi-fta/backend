@@ -1,7 +1,6 @@
 import type { CorsOptions } from 'cors';
 
-const { env } = process;
-const whitelistOrigin = ['http://localhost:3000', 'http://192.168.1.69:3000'];
+const whitelistOrigin = ['http://localhost:3000'];
 
 const corsOption: CorsOptions = {
   origin: (origin, callback) => {
@@ -16,24 +15,23 @@ const corsOption: CorsOptions = {
   credentials: true,
 };
 
-const config = {
+export default () => ({
   jwt: {
-    accessSecret: env.JWT_ACCESS_SECRET!,
-    refreshSecret: env.JWT_REFRESH_SECRET!,
-    accessExpire: env.JWT_ACCESS_EXPIRE!,
-    refreshExpire: env.JWT_REFRESH_EXPIRE!,
+    accessSecret: process.env.JWT_ACCESS_SECRET!,
+    refreshSecret: process.env.JWT_REFRESH_SECRET!,
+    accessExpire: process.env.JWT_ACCESS_EXPIRE!,
+    refreshExpire: process.env.JWT_REFRESH_EXPIRE!,
   },
   hashRounds: 12,
   db: {
-    host: env.DB_HOST!,
-    port: parseInt(env.DB_PORT!),
-    database: env.DB_DATABASE!,
-    username: env.DB_USERNAME!,
-    password: env.DB_PASSWORD!,
+    type: 'mysql',
+    host: process.env.DB_HOST!,
+    port: parseInt(process.env.DB_PORT!),
+    database: process.env.DB_DATABASE!,
+    username: process.env.DB_USERNAME!,
+    password: process.env.DB_PASSWORD!,
   },
   cors: corsOption,
-  isDev: env.NODE_ENV === 'development',
-  port: env.PORT,
-};
-
-export default (): typeof config => config;
+  isDev: process.env.NODE_ENV === 'development',
+  port: process.env.PORT,
+});
