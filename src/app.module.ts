@@ -6,13 +6,15 @@ import {
   RequestMethod,
 } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 import { loggerData } from './utils/logger.util';
 import { LoggerMiddleware } from './middleware/logger.middleware';
-import { HealthcheckModule } from './healthcheck/healthcheck.module';
-import { LoggerModule } from './logger/logger.module';
+import { HealthcheckModule } from './module/healthcheck/healthcheck.module';
+import { LoggerModule } from './module/logger/logger.module';
 import config from './config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import dataSource from './database/datasource';
 
 @Module({
   imports: [
@@ -20,6 +22,11 @@ import config from './config';
       isGlobal: true,
       load: [config],
       envFilePath: '.env',
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: dataSource,
+      inject: [ConfigService],
     }),
     WinstonModule.forRoot(loggerData),
     HealthcheckModule,

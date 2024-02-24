@@ -43,7 +43,7 @@ async function bootstrap() {
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   app.setGlobalPrefix('v1');
 
-  await app.listen(configService.get<number>('PORT'));
+  await app.listen(configService.get<number>('port'));
   logger.info(`Backend is running on: ${await app.getUrl()}`);
 }
 
