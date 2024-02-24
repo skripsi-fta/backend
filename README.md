@@ -39,7 +39,10 @@ $ npm install
 $ npm run start
 
 # watch mode
-$ npm run start:dev
+$ npm run dev
+
+# watch with debug mode
+$ npm run dev:debug
 
 # production mode
 $ npm run start:prod
