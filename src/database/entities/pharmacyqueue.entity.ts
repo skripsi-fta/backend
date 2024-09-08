@@ -1,30 +1,26 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Appointment } from './appointment.entitity';
 
 @Entity()
-export class Pharmacyqueue {
+export class PharmacyQueue {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  detail: string;
-
-  @Column()
-  queue_number: number;
-
-  @Column()
+  @Column({
+    type: 'time',
+  })
   start_time: Date;
 
-  @Column()
-  end_time: Date;
+  @Column({
+    type: 'time',
+  })
+  finish_time: Date;
 
-  @OneToOne(() => Appointment, (id_appointment) => id_appointment)
-  @JoinColumn({ name: 'id_appointment' })
-  id_appointment: Appointment;
+  @Column({
+    type: 'date',
+  })
+  date: Date;
+
+  @OneToOne(() => Appointment, (appointment) => appointment.id)
+  appointment: Appointment;
 }

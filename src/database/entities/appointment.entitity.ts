@@ -3,50 +3,112 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { MedicalRecord } from './medicalrecord.entity';
-import { Cashierqueue } from './cashierqueue.entity';
-import { Doctorqueue } from './doctorqueue.entity';
-import { Pharmacyqueue } from './pharmacyqueue.entity';
+import { DoctorQueue } from './doctorqueue.entity';
+import { PharmacyQueue } from './pharmacyqueue.entity';
+import { CashierQueue } from './cashierqueue.entity';
+import { Schedule } from './schedule.entity';
 
 @Entity()
 export class Appointment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => MedicalRecord, (medical_record) => medical_record)
-  @JoinColumn()
-  medical_record: MedicalRecord;
-
-  @Column()
+  @Column({})
   booking_code: string;
 
-  @Column()
-  status_appointment: string;
+  @Column({})
+  booking_qr: string;
+
+  @Column({
+    type: 'enum',
+    enum: [
+      'waiting',
+      'checkin',
+      'doctor queue',
+      'pharmacy queue',
+      'cashier queue',
+      'done',
+      'cancel',
+    ],
+  })
+  appointment_status: string;
 
   @Column({ default: false })
-  is_checkdin: boolean;
+  is_check_in: boolean;
 
-  @Column()
-  payment: string;
-
-  @Column({ nullable: true })
+  @Column({
+    type: 'time',
+    nullable: true,
+  })
   check_in_time: Date;
 
-  @Column({ nullable: true })
+  @Column({
+    type: 'time',
+    nullable: true,
+  })
   finish_time: Date;
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
+  consultation_fee: number;
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+  })
+  pharmacy_fee: number;
+
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
+  admin_fee: number;
 
   @CreateDateColumn()
   created_at: Date;
 
-  @OneToOne(() => Cashierqueue, (cashier_queue) => cashier_queue)
-  cashie_queue: Cashierqueue;
+  @UpdateDateColumn({
+    nullable: true,
+  })
+  updated_at: Date;
 
-  @OneToOne(() => Doctorqueue, (doctor_queue) => doctor_queue)
-  doctor_queue: Doctorqueue;
+  @OneToOne(() => MedicalRecord, (medicalRecord) => medicalRecord.id, {
+    nullable: true,
+  })
+  @JoinColumn()
+  medical_record: MedicalRecord;
 
-  @OneToOne(() => Pharmacyqueue, (pharmacy_queue) => pharmacy_queue)
-  pharmacy_queue: Pharmacyqueue;
+  @OneToOne(() => DoctorQueue, (doctorQueue) => doctorQueue.id, {
+    nullable: true,
+  })
+  @JoinColumn()
+  doctor_queue: DoctorQueue;
+
+  @OneToOne(() => PharmacyQueue, (pharmacyQueue) => pharmacyQueue.id, {
+    nullable: true,
+  })
+  @JoinColumn()
+  pharmacy_queue: PharmacyQueue;
+
+  @OneToOne(() => CashierQueue, (cashierQueue) => cashierQueue.id, {
+    nullable: true,
+  })
+  @JoinColumn()
+  cashier_queue: CashierQueue;
+
+  @ManyToOne(() => Schedule, (schedule) => schedule.id)
+  schedule: Schedule;
 }

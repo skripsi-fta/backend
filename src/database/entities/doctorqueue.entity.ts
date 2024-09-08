@@ -1,30 +1,39 @@
 import {
   Column,
   Entity,
-  JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Appointment } from './appointment.entitity';
+import { Staff } from './staff.entity';
 
 @Entity()
-export class Doctorqueue {
+export class DoctorQueue {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  detail: string;
-
-  @Column()
   queue_number: number;
 
-  @Column()
+  @Column({
+    type: 'time',
+  })
   start_time: Date;
 
-  @Column()
-  end_time: Date;
+  @Column({
+    type: 'time',
+  })
+  finish_time: Date;
 
-  @OneToOne(() => Appointment, (id_appointment) => id_appointment)
-  @JoinColumn({ name: 'id_appointment' })
-  id_appointment: Appointment;
+  @Column({
+    type: 'date',
+  })
+  date: Date;
+
+  @OneToMany(() => Staff, (staff) => staff.id)
+  staff: Staff;
+
+  @OneToOne(() => Appointment, (appointment) => appointment.id)
+  appointment: Appointment;
 }

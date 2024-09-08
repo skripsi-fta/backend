@@ -1,9 +1,11 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Patient } from './patient.entity';
 import { Appointment } from './appointment.entitity';
@@ -12,9 +14,6 @@ import { Appointment } from './appointment.entitity';
 export class MedicalRecord {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @ManyToOne(() => Patient, (patient) => patient, { onDelete: 'CASCADE' })
-  patient: Patient;
 
   @Column()
   height: number;
@@ -31,12 +30,41 @@ export class MedicalRecord {
   @Column()
   temperature: number;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+  })
+  illness: string;
+
+  @Column({
+    type: 'varchar',
+    length: 150,
+    nullable: true,
+  })
   diagnosis_doctor: string;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   prescription: string;
 
-  @OneToOne(() => Appointment, (appointment) => appointment)
+  @Column({
+    type: 'varchar',
+    length: 150,
+    nullable: true,
+  })
+  notes: string;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
+
+  @ManyToOne(() => Patient, (patient) => patient.id)
+  patient: Patient;
+
+  @OneToOne(() => Appointment, (appointment) => appointment.id)
   appointment: Appointment;
 }
