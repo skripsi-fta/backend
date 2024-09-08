@@ -19,6 +19,6 @@ export class Room {
   })
   detail: string;
 
-  @OneToMany(() => Schedule, (schedule) => schedule.id)
+  @OneToMany(() => Schedule, (schedule) => schedule.id, { nullable: true })
   schedules: Schedule[];
 }

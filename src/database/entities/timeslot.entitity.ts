@@ -19,6 +19,6 @@ export class TimeSlot {
   @Column()
   duration: number;
 
-  @OneToMany(() => Schedule, (schedule) => schedule.id)
+  @OneToMany(() => Schedule, (schedule) => schedule.id, { nullable: true })
   schedules: Schedule[];
 }
