@@ -15,6 +15,7 @@ export enum IdType {
   DRIVER_LICENSE = 'DRIVER_LICENSE',
   NATIONAL_ID = 'NATIONAL_ID',
 }
+
 @Entity()
 export class Patient {
   @PrimaryGeneratedColumn()

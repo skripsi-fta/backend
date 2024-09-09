@@ -2,14 +2,16 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToMany,
+  JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Schedule } from './schedule.entity';
 import { DoctorQueue } from './doctorqueue.entity';
+import { Doctor } from './doctor.entity';
 
 @Entity()
 export class Staff {
@@ -41,11 +43,6 @@ export class Staff {
   password: string;
 
   @Column({
-    type: 'float',
-  })
-  rating: number;
-
-  @Column({
     type: 'enum',
     enum: ['DOCTOR', 'NURSE', 'PHARMACIST', 'RECEPTIONIST', 'ADMIN'],
   })
@@ -58,6 +55,10 @@ export class Staff {
     nullable: true,
   })
   updated_at: Date;
+
+  @OneToOne(() => Doctor, (doctor) => doctor.id, { nullable: true })
+  @JoinColumn()
+  doctor: Doctor;
 
   @OneToMany(() => Schedule, (schedule) => schedule.id, { nullable: true })
   schedules: Schedule[];
