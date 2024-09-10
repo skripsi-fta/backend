@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Appointment } from './appointment.entitity';
-import { Staff } from './staff.entity';
+import { Doctor } from './doctor.entity';
 
 @Entity()
 export class DoctorQueue {
@@ -31,8 +31,8 @@ export class DoctorQueue {
   })
   date: Date;
 
-  @OneToMany(() => Staff, (staff) => staff.id)
-  staff: Staff;
+  @OneToMany(() => Doctor, (doctor) => doctor.id)
+  doctor: Doctor;
 
   @OneToOne(() => Appointment, (appointment) => appointment.id)
   appointment: Appointment;

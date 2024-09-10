@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Speciality } from './speciality.entity';
 import { Staff } from './staff.entity';
+import { DoctorQueue } from './doctorqueue.entity';
 
 @Entity()
 export class Doctor {
@@ -16,13 +17,8 @@ export class Doctor {
   id: number;
 
   @Column({
-    type: 'float',
-  })
-  rating: number;
-
-  @Column({
     type: 'varchar',
-    length: 255,
+    length: 50,
   })
   name: string;
 
@@ -30,6 +26,11 @@ export class Doctor {
     type: 'text',
   })
   bio: string;
+
+  @Column({
+    type: 'float',
+  })
+  rating: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -44,4 +45,9 @@ export class Doctor {
     nullable: true,
   })
   speciality: Speciality;
+
+  @ManyToOne(() => DoctorQueue, (doctorqueue) => doctorqueue.id, {
+    nullable: true,
+  })
+  doctorqueue: DoctorQueue;
 }

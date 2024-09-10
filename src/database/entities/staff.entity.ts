@@ -3,14 +3,12 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Schedule } from './schedule.entity';
-import { DoctorQueue } from './doctorqueue.entity';
 import { Doctor } from './doctor.entity';
 
 @Entity()
@@ -62,9 +60,4 @@ export class Staff {
 
   @OneToMany(() => Schedule, (schedule) => schedule.id, { nullable: true })
   schedules: Schedule[];
-
-  @ManyToOne(() => DoctorQueue, (doctorqueue) => doctorqueue.id, {
-    nullable: true,
-  })
-  doctorqueue: DoctorQueue;
 }
