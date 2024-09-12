@@ -14,6 +14,7 @@ import { HealthcheckModule } from './module/healthcheck/healthcheck.module';
 import { LoggerModule } from './module/logger/logger.module';
 import config from './config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { StaffModule } from './module/staff/staff.module';
 import dataSource from './database/datasource';
 
 @Module({
@@ -31,6 +32,7 @@ import dataSource from './database/datasource';
     WinstonModule.forRoot(loggerData),
     HealthcheckModule,
     LoggerModule,
+    StaffModule,
   ],
   controllers: [AppController],
   providers: [Logger],
