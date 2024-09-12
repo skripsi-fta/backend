@@ -8,6 +8,7 @@ export interface APIResponse {
   statusCode?: StatusCodes;
   success?: boolean;
   message: string;
+  totalRows?: number;
   data?: unknown;
 }
 
