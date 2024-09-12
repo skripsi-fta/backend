@@ -6,20 +6,17 @@ export const REFRESH_TOKEN_COOKIE = 'refreshToken';
 
 export interface APIResponse {
   statusCode?: StatusCodes;
-  success?: boolean;
   message: string;
   totalRows?: number;
   data?: unknown;
 }
 
 export function sendResponse(res: Response, params: APIResponse) {
-  const { statusCode, success, ...newParams } = params;
+  const { statusCode, ...newParams } = params;
 
-  const isSuccess = success ?? true;
   const code = statusCode ?? StatusCodes.OK;
 
   const response = {
-    status: isSuccess ? 'success' : 'fail',
     ...newParams,
   };
 
@@ -39,7 +36,6 @@ export class ResponseError extends Error {
   static toResponse(error: ResponseError): APIResponse {
     return {
       statusCode: error.statusCode,
-      success: false,
       message: error.message,
     };
   }

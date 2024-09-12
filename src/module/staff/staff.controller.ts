@@ -27,22 +27,36 @@ export class StaffController {
   async getStaff(
     @Res() res: Response,
     @Query('id') id: number,
+    @Query('role') role: string,
+    @Query('name') name: string,
+    @Query('email') email: string,
     @Query('pageSize', new DefaultValuePipe(0)) pageSize: number,
-    @Query('pageNumber', new DefaultValuePipe(0)) pageNumber: number,
+    @Query('pageNumber', new DefaultValuePipe(1)) pageNumber: number,
   ) {
-    const data = await this.staffService.getStaff(pageSize, pageNumber, id);
-
-    if (data.list.length == 0) {
+    if (
+      role &&
+      !['DOCTOR', 'NURSE', 'PHARMACIST', 'RECEPTIONIST', 'ADMIN'].includes(
+        role.toUpperCase(),
+      )
+    ) {
       return sendResponse(res, {
-        statusCode: StatusCodes.NOT_FOUND,
-        success: false,
-        message: 'NOT FOUND',
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: 'Invalid role',
       });
     }
 
+    const data = await this.staffService.getStaff(
+      pageSize,
+      pageNumber,
+      id,
+      role,
+      name,
+      email,
+    );
+
     return sendResponse(res, {
-      statusCode: 200,
-      message: 'GET USER',
+      statusCode: StatusCodes.OK,
+      message: 'GET USER Success',
       totalRows: data.totalRows,
       data: data.list,
     });
@@ -53,20 +67,19 @@ export class StaffController {
     const data = await this.staffService.addStaff(req);
 
     return sendResponse(res, {
-      statusCode: 200,
-      message: 'POST USER',
+      statusCode: StatusCodes.OK,
+      message: 'POST USER Success',
       data: data.identifiers[0].id,
     });
   }
 
   @Put()
   async updateStaff(@Res() res: Response, @Body() req: StaffPostDTO) {
-    this.log.info('req:' + JSON.stringify(req));
     const data = await this.staffService.updateStaff(req);
 
     return sendResponse(res, {
-      statusCode: 200,
-      message: 'PUT USER',
+      statusCode: StatusCodes.OK,
+      message: 'PUT USER Success',
       data: data.affected,
     });
   }
@@ -77,7 +90,7 @@ export class StaffController {
 
     return sendResponse(res, {
       statusCode: 200,
-      message: 'DELETE USER',
+      message: 'DELETE USER Success',
       data: data.affected,
     });
   }

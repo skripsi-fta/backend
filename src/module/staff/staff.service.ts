@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { LoggerService } from '../logger/logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Staff } from 'src/database/entities/staff.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { StaffPostDTO } from './model/staff.dto';
 import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
@@ -18,22 +18,29 @@ export class StaffService {
     private readonly doctorRepository: Repository<Doctor>,
   ) {}
 
-  async getStaff(pageSize: number, pageNumber: number, id: number) {
+  async getStaff(
+    pageSize: number,
+    pageNumber: number,
+    id: number,
+    role: string,
+    name: string,
+    email: string,
+  ) {
     const [data, count] = await this.staffRepository.findAndCount({
       select: ['id', 'username', 'name', 'email', 'role', 'doctor'],
       relations: ['doctor'],
-      skip: pageNumber * pageSize,
+      skip: (pageNumber - 1) * pageSize,
       take: pageSize,
       order: {
         id: 'ASC',
       },
       where: {
         id: id ? id : undefined,
+        name: name ? Like(`%${name}%`) : undefined,
+        email: email ? Like(`%${email}%`) : undefined,
+        role: role ? role.toUpperCase() : undefined,
       },
     });
-
-    // count
-    this.log.info('data: ' + count.toString());
 
     return {
       totalRows: count,
