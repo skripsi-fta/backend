@@ -18,7 +18,7 @@ export class HealthcheckController {
 
   @Get()
   async getHealth(@Res() res: Response) {
-    this.loggerService.log('Health Check GET');
+    this.loggerService.info('Health Check GET');
 
     await this.healthRepository.insert({ type: 'get' });
     const healthdatas = await this.healthRepository.find();
@@ -32,7 +32,7 @@ export class HealthcheckController {
 
   @Post()
   async postHealth(@Res() res: Response, @Body() body: HealthCheckPostDTO) {
-    this.loggerService.log('Health Check POST');
+    this.loggerService.info('Health Check POST');
     await this.healthRepository.insert({ type: 'post' });
     await this.testRepository.insert({ message: body.message });
 

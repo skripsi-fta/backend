@@ -24,7 +24,7 @@ export default () => ({
   },
   hashRounds: 12,
   db: {
-    type: 'mysql',
+    type: 'postgres',
     host: process.env.DB_HOST!,
     port: parseInt(process.env.DB_PORT!),
     database: process.env.DB_DATABASE!,
