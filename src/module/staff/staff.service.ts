@@ -35,14 +35,17 @@ export class StaffService {
     // count
     this.log.info('data: ' + count.toString());
 
-    return data.map((user) => ({
-      id: user.id,
-      username: user.username,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      doctorName: user.doctor?.name || null,
-    }));
+    return {
+      totalRows: count,
+      list: data.map((user) => ({
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        doctorName: user.doctor?.name || null,
+      })),
+    };
   }
 
   async addStaff(data: StaffPostDTO) {

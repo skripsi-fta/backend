@@ -32,7 +32,7 @@ export class StaffController {
   ) {
     const data = await this.staffService.getStaff(pageSize, pageNumber, id);
 
-    if (data.length == 0) {
+    if (data.list.length == 0) {
       return sendResponse(res, {
         statusCode: StatusCodes.NOT_FOUND,
         success: false,
@@ -43,7 +43,8 @@ export class StaffController {
     return sendResponse(res, {
       statusCode: 200,
       message: 'GET USER',
-      data: data,
+      totalRows: data.totalRows,
+      data: data.list,
     });
   }
 
