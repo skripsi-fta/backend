@@ -16,6 +16,7 @@ import config from './config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { StaffModule } from './module/staff/staff.module';
 import dataSource from './database/datasource';
+import { DoctorModule } from './module/doctor/doctor.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import dataSource from './database/datasource';
     HealthcheckModule,
     LoggerModule,
     StaffModule,
+    DoctorModule,
   ],
   controllers: [AppController],
   providers: [Logger],
