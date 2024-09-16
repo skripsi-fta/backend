@@ -12,9 +12,10 @@ import {
 import { LoggerService } from '../logger/logger.service';
 import { sendResponse } from 'src/utils/api.utils';
 import { Response } from 'express';
-import { StaffPostDTO } from './model/staff.dto';
+import { StaffPostDTO, StaffPutDTO } from './model/staff.dto';
 import { StaffService } from './staff.service';
 import { StatusCodes } from 'http-status-codes';
+import { StaffRole } from 'src/database/entities/staff.entity';
 
 @Controller('staff')
 export class StaffController {
@@ -35,13 +36,11 @@ export class StaffController {
   ) {
     if (
       role &&
-      !['DOCTOR', 'NURSE', 'PHARMACIST', 'RECEPTIONIST', 'ADMIN'].includes(
-        role.toUpperCase(),
-      )
+      !Object.values(StaffRole).includes(role.toUpperCase() as StaffRole)
     ) {
       return sendResponse(res, {
         statusCode: StatusCodes.BAD_REQUEST,
-        message: 'Invalid role',
+        message: 'Failed - Invalid role',
       });
     }
 
@@ -56,7 +55,9 @@ export class StaffController {
 
     return sendResponse(res, {
       statusCode: StatusCodes.OK,
-      message: 'GET USER Success',
+      message: 'Success - GET Staff',
+      pageSize: Number(pageSize) || 0,
+      pageNumber: Number(pageNumber) || 1,
       totalRows: data.totalRows,
       data: data.list,
     });
@@ -64,34 +65,51 @@ export class StaffController {
 
   @Post()
   async addStaff(@Res() res: Response, @Body() req: StaffPostDTO) {
+    if (
+      req.role &&
+      !Object.values(StaffRole).includes(req.role.toUpperCase() as StaffRole)
+    ) {
+      return sendResponse(res, {
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: 'Failed - Invalid role',
+      });
+    }
+
     const data = await this.staffService.addStaff(req);
 
     return sendResponse(res, {
       statusCode: StatusCodes.OK,
-      message: 'POST USER Success',
-      data: data.identifiers[0].id,
+      message: 'Success - POST Staff',
+      data: { id: data.identifiers[0].id },
     });
   }
 
   @Put()
-  async updateStaff(@Res() res: Response, @Body() req: StaffPostDTO) {
+  async updateStaff(@Res() res: Response, @Body() req: StaffPutDTO) {
     const data = await this.staffService.updateStaff(req);
 
     return sendResponse(res, {
       statusCode: StatusCodes.OK,
-      message: 'PUT USER Success',
-      data: data.affected,
+      message: 'Success - UPDATE Staff',
+      data: { dataAffected: data.affected },
     });
   }
 
   @Delete()
   async deleteStaff(@Res() res: Response, @Query('id') id: number) {
+    if (!id || isNaN(id)) {
+      return sendResponse(res, {
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: 'Failed - Invalid ID',
+      });
+    }
+
     const data = await this.staffService.deleteStaff(id);
 
     return sendResponse(res, {
-      statusCode: 200,
-      message: 'DELETE USER Success',
-      data: data.affected,
+      statusCode: StatusCodes.OK,
+      message: 'Success - DELETE Staff',
+      data: { dataAffected: data.affected },
     });
   }
 }

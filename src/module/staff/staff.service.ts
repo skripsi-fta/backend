@@ -3,7 +3,7 @@ import { LoggerService } from '../logger/logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Staff } from 'src/database/entities/staff.entity';
 import { Like, Repository } from 'typeorm';
-import { StaffPostDTO } from './model/staff.dto';
+import { StaffPostDTO, StaffPutDTO } from './model/staff.dto';
 import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import { Doctor } from 'src/database/entities/doctor.entity';
@@ -50,12 +50,23 @@ export class StaffService {
         name: user.name,
         email: user.email,
         role: user.role,
-        doctorName: user.doctor?.name || null,
+        doctor: user?.doctor || undefined,
       })),
     };
   }
 
   async addStaff(data: StaffPostDTO) {
+    const userExist = await this.staffRepository.findOne({
+      where: [{ username: data.username }, { email: data.email }],
+    });
+
+    if (userExist) {
+      throw new ResponseError(
+        'Username or email already exist',
+        StatusCodes.CONFLICT,
+      );
+    }
+
     if (data.role === 'DOCTOR') {
       if (!data.doctorId) {
         throw new ResponseError(
@@ -80,7 +91,7 @@ export class StaffService {
     return await this.staffRepository.insert(data);
   }
 
-  async updateStaff(data: StaffPostDTO) {
+  async updateStaff(data: StaffPutDTO) {
     const staff = await this.staffRepository.findOneBy({ id: data.id });
 
     if (!staff) {
@@ -109,6 +120,7 @@ export class StaffService {
           username: data.username,
           name: data.name,
           email: data.email,
+          password: data.password,
           role: data.role,
           doctor,
         },
@@ -121,6 +133,7 @@ export class StaffService {
         username: data.username,
         name: data.name,
         email: data.email,
+        password: data.password,
         role: data.role,
       },
     );

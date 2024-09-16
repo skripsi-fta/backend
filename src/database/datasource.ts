@@ -14,7 +14,7 @@ import { Schedule } from './entities/schedule.entity';
 import { Auth } from './entities/auth.entitity';
 import { TimeSlot } from './entities/timeslot.entitity';
 import { Doctor } from './entities/doctor.entity';
-import { Speciality } from './entities/speciality.entity';
+import { Specialization } from './entities/specialization.entity';
 
 const dataSource = (configService: ConfigService) => ({
   ...configService.get<TypeOrmModuleOptions>('db'),
@@ -34,7 +34,7 @@ const dataSource = (configService: ConfigService) => ({
     Auth,
     Doctor,
     Staff,
-    Speciality,
+    Specialization,
   ],
   subscribers: [],
   migrations: [],

@@ -23,13 +23,11 @@ export class Patient {
 
   @Column({
     type: 'varchar',
-    length: 100,
   })
   name: string;
 
   @Column({
     type: 'varchar',
-    length: 50,
     nullable: true,
   })
   address: string;

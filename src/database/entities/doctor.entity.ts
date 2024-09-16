@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Speciality } from './speciality.entity';
+import { Specialization } from './specialization.entity';
 import { Staff } from './staff.entity';
 import { DoctorQueue } from './doctorqueue.entity';
 
@@ -18,19 +18,31 @@ export class Doctor {
 
   @Column({
     type: 'varchar',
-    length: 50,
   })
   name: string;
 
   @Column({
     type: 'text',
   })
-  bio: string;
+  profile: string;
 
   @Column({
     type: 'float',
+    default: 0,
   })
   rating: number;
+
+  @Column({
+    type: 'int',
+    default: 0,
+  })
+  totalRating: number;
+
+  @Column({
+    type: 'int',
+    default: 0,
+  })
+  consulePrice: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -41,10 +53,10 @@ export class Doctor {
   @OneToOne(() => Staff, (staff) => staff.id, { nullable: true })
   staff: Staff;
 
-  @ManyToOne(() => Speciality, (speciality) => speciality.id, {
+  @ManyToOne(() => Specialization, (specialization) => specialization.id, {
     nullable: true,
   })
-  speciality: Speciality;
+  specialization: Specialization;
 
   @ManyToOne(() => DoctorQueue, (doctorqueue) => doctorqueue.id, {
     nullable: true,

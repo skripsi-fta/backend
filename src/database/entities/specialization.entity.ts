@@ -2,7 +2,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Staff } from './staff.entity';
 
 @Entity()
-export class Speciality {
+export class Specialization {
   @PrimaryGeneratedColumn()
   id: number;
 
