@@ -1,4 +1,5 @@
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { StaffRole } from 'src/database/entities/staff.entity';
 
 export class StaffPostDTO {
   @IsNumber()
@@ -17,7 +18,7 @@ export class StaffPostDTO {
   @IsString()
   password: string;
 
-  @IsEnum(['DOCTOR', 'NURSE', 'PHARMACIST', 'RECEPTIONIST', 'ADMIN'])
+  @IsEnum(StaffRole)
   role: string;
 
   @IsOptional()

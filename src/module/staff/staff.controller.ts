@@ -65,6 +65,16 @@ export class StaffController {
 
   @Post()
   async addStaff(@Res() res: Response, @Body() req: StaffPostDTO) {
+    if (
+      req.role &&
+      !Object.values(StaffRole).includes(req.role.toUpperCase() as StaffRole)
+    ) {
+      return sendResponse(res, {
+        statusCode: StatusCodes.BAD_REQUEST,
+        message: 'Failed - Invalid role',
+      });
+    }
+
     const data = await this.staffService.addStaff(req);
 
     return sendResponse(res, {
