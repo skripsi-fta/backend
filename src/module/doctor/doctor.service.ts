@@ -61,12 +61,13 @@ export class DoctorService {
       consulePrice: data.consulePrice,
     });
 
-    await this.doctorRepository.save(doctor);
+    const result = await this.doctorRepository.save(doctor);
 
     return {
-      id: doctor.id,
-      name: doctor.name,
-      profile: doctor.profile,
+      id: result.id,
+      name: result.name,
+      profile: result.profile,
+      consulePrice: result.consulePrice,
     };
   }
 
@@ -81,12 +82,13 @@ export class DoctorService {
     doctor.profile = req.profile;
     doctor.consulePrice = req.consulePrice;
 
-    await this.doctorRepository.save(doctor);
+    const result = await this.doctorRepository.save(doctor);
 
     return {
-      id: doctor.id,
-      name: doctor.name,
-      profile: doctor.profile,
+      id: result.id,
+      name: result.name,
+      profile: result.profile,
+      consulePrice: result.consulePrice,
     };
   }
 
@@ -94,7 +96,10 @@ export class DoctorService {
     const doctor = await this.doctorRepository.findOneBy({ id });
 
     if (!doctor) {
-      throw new ResponseError('Doctor not found', StatusCodes.NOT_FOUND);
+      throw new ResponseError(
+        'Failed - Doctor not found',
+        StatusCodes.NOT_FOUND,
+      );
     }
 
     return await this.doctorRepository.delete({ id });
