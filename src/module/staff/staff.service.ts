@@ -120,6 +120,7 @@ export class StaffService {
           username: data.username,
           name: data.name,
           email: data.email,
+          password: data.password,
           role: data.role,
           doctor,
         },
@@ -132,6 +133,7 @@ export class StaffService {
         username: data.username,
         name: data.name,
         email: data.email,
+        password: data.password,
         role: data.role,
       },
     );

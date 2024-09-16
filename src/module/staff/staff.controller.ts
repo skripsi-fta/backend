@@ -56,8 +56,8 @@ export class StaffController {
     return sendResponse(res, {
       statusCode: StatusCodes.OK,
       message: 'Success - GET Staff',
-      pageSize: pageSize || 0,
-      pageNumber: pageNumber || 1,
+      pageSize: Number(pageSize) || 0,
+      pageNumber: Number(pageNumber) || 1,
       totalRows: data.totalRows,
       data: data.list,
     });
