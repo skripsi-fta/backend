@@ -17,6 +17,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { StaffModule } from './module/staff/staff.module';
 import dataSource from './database/datasource';
 import { DoctorModule } from './module/doctor/doctor.module';
+import { RoomModule } from './module/room/room.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { DoctorModule } from './module/doctor/doctor.module';
     LoggerModule,
     StaffModule,
     DoctorModule,
+    RoomModule,
   ],
   controllers: [AppController],
   providers: [Logger],
