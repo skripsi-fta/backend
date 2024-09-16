@@ -67,7 +67,7 @@ export class DoctorController {
     return sendResponse(res, {
       statusCode: 200,
       message: 'Success - POST Doctor',
-      data: { id: data.id },
+      data: data,
     });
   }
 
@@ -85,7 +85,7 @@ export class DoctorController {
     return sendResponse(res, {
       statusCode: 200,
       message: 'Success - PUT Doctor',
-      data: { id: data.id },
+      data: data,
     });
   }
 
