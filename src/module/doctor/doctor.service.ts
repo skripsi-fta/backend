@@ -60,8 +60,8 @@ export class DoctorService {
         consulePrice: doctor.consulePrice,
         totalRating: doctor.totalRating,
         rating: doctor.rating,
-        specializationName: doctor.specialization.name,
-        specializationDescription: doctor.specialization.description,
+        specializationName: doctor.specialization?.name,
+        specializationDescription: doctor.specialization?.description,
       })),
     };
   }
