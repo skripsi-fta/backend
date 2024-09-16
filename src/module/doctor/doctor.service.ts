@@ -32,7 +32,15 @@ export class DoctorService {
     };
 
     const [data, count] = await this.doctorRepository.findAndCount({
-      select: ['id', 'name', 'profile', 'consulePrice'],
+      select: {
+        id: true,
+        name: true,
+        profile: true,
+        consulePrice: true,
+        rating: true,
+        totalRating: true,
+        specialization: { name: true, description: true },
+      },
       relations: ['specialization'],
       skip: (pageNumber - 1) * pageSize,
       take: pageSize,
@@ -50,6 +58,10 @@ export class DoctorService {
         name: doctor.name,
         profile: doctor.profile,
         consulePrice: doctor.consulePrice,
+        totalRating: doctor.totalRating,
+        rating: doctor.rating,
+        specializationName: doctor.specialization.name,
+        specializationDescription: doctor.specialization.description,
       })),
     };
   }
