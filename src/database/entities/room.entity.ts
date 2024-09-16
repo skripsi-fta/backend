@@ -8,13 +8,11 @@ export class Room {
 
   @Column({
     type: 'varchar',
-    length: 25,
   })
   name: string;
 
   @Column({
     type: 'varchar',
-    length: 50,
     nullable: true,
   })
   detail: string;

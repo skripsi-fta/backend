@@ -8,6 +8,8 @@ export interface APIResponse {
   statusCode?: StatusCodes;
   message: string;
   totalRows?: number;
+  pageSize?: number;
+  pageNumber?: number;
   data?: unknown;
 }
 
@@ -17,6 +19,7 @@ export function sendResponse(res: Response, params: APIResponse) {
   const code = statusCode ?? StatusCodes.OK;
 
   const response = {
+    statusCode: code,
     ...newParams,
   };
 

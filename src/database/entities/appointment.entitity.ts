@@ -28,7 +28,7 @@ export class Appointment {
   @Column({
     type: 'enum',
     enum: [
-      'waiting',
+      'scheduled',
       'checkin',
       'doctor queue',
       'pharmacy queue',
@@ -36,6 +36,7 @@ export class Appointment {
       'done',
       'cancel',
     ],
+    default: 'scheduled',
   })
   appointment_status: string;
 

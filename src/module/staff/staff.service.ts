@@ -50,12 +50,23 @@ export class StaffService {
         name: user.name,
         email: user.email,
         role: user.role,
-        doctorName: user.doctor?.name || null,
+        doctor: user?.doctor || undefined,
       })),
     };
   }
 
   async addStaff(data: StaffPostDTO) {
+    const userExist = await this.staffRepository.findOne({
+      where: [{ username: data.username }, { email: data.email }],
+    });
+
+    if (userExist) {
+      throw new ResponseError(
+        'Username or email already exist',
+        StatusCodes.CONFLICT,
+      );
+    }
+
     if (data.role === 'DOCTOR') {
       if (!data.doctorId) {
         throw new ResponseError(
