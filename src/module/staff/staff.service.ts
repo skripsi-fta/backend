@@ -3,7 +3,7 @@ import { LoggerService } from '../logger/logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Staff } from 'src/database/entities/staff.entity';
 import { Like, Repository } from 'typeorm';
-import { StaffPostDTO } from './model/staff.dto';
+import { StaffPostDTO, StaffPutDTO } from './model/staff.dto';
 import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import { Doctor } from 'src/database/entities/doctor.entity';
@@ -91,7 +91,7 @@ export class StaffService {
     return await this.staffRepository.insert(data);
   }
 
-  async updateStaff(data: StaffPostDTO) {
+  async updateStaff(data: StaffPutDTO) {
     const staff = await this.staffRepository.findOneBy({ id: data.id });
 
     if (!staff) {

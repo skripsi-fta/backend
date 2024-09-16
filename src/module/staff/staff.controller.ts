@@ -12,7 +12,7 @@ import {
 import { LoggerService } from '../logger/logger.service';
 import { sendResponse } from 'src/utils/api.utils';
 import { Response } from 'express';
-import { StaffPostDTO } from './model/staff.dto';
+import { StaffPostDTO, StaffPutDTO } from './model/staff.dto';
 import { StaffService } from './staff.service';
 import { StatusCodes } from 'http-status-codes';
 import { StaffRole } from 'src/database/entities/staff.entity';
@@ -85,7 +85,7 @@ export class StaffController {
   }
 
   @Put()
-  async updateStaff(@Res() res: Response, @Body() req: StaffPostDTO) {
+  async updateStaff(@Res() res: Response, @Body() req: StaffPutDTO) {
     const data = await this.staffService.updateStaff(req);
 
     return sendResponse(res, {
