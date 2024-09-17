@@ -14,6 +14,9 @@ export class DoctorPostDTO {
 
   @IsNumberString()
   consulePrice: number;
+
+  @IsNumber()
+  specializationId: number;
 }
 
 export class DoctorPutDTO {
@@ -31,4 +34,7 @@ export class DoctorPutDTO {
   @IsNumberString()
   @IsOptional()
   consulePrice: number;
+
+  @IsNumber()
+  specializationId: number;
 }

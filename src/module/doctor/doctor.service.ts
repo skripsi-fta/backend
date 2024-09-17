@@ -6,6 +6,7 @@ import { Doctor } from 'src/database/entities/doctor.entity';
 import { DoctorPostDTO, DoctorPutDTO } from './model/doctor.dto';
 import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
+import { Specialization } from 'src/database/entities/specialization.entity';
 
 @Injectable()
 export class DoctorService {
@@ -13,6 +14,8 @@ export class DoctorService {
     private log: LoggerService,
     @InjectRepository(Doctor)
     private readonly doctorRepository: Repository<Doctor>,
+    @InjectRepository(Specialization)
+    private readonly specializationRepository: Repository<Specialization>,
   ) {}
 
   async getDoctor(
@@ -39,7 +42,7 @@ export class DoctorService {
         consulePrice: true,
         rating: true,
         totalRating: true,
-        specialization: { name: true, description: true },
+        specialization: { name: true, description: true, id: true },
       },
       relations: ['specialization'],
       skip: (pageNumber - 1) * pageSize,
@@ -62,15 +65,25 @@ export class DoctorService {
         rating: doctor.rating,
         specializationName: doctor.specialization?.name,
         specializationDescription: doctor.specialization?.description,
+        specializationId: doctor.specialization?.id,
       })),
     };
   }
 
   async addDoctor(data: DoctorPostDTO) {
+    const specialization = await this.specializationRepository.findOne({
+      where: { id: data.specializationId },
+    });
+
+    if (!specialization) {
+      throw new ResponseError('Specialization not found', StatusCodes.CONFLICT);
+    }
+
     const doctor = this.doctorRepository.create({
       name: data.name,
       profile: data.profile,
       consulePrice: data.consulePrice,
+      specialization,
     });
 
     const result = await this.doctorRepository.save(doctor);
@@ -84,6 +97,14 @@ export class DoctorService {
   }
 
   async updateDoctor(req: DoctorPutDTO) {
+    const specialization = await this.specializationRepository.findOne({
+      where: { id: req.specializationId },
+    });
+
+    if (!specialization) {
+      throw new ResponseError('Specialization not found', StatusCodes.CONFLICT);
+    }
+
     const doctor = await this.doctorRepository.findOneBy({ id: req.id });
 
     if (!doctor) {
@@ -93,6 +114,7 @@ export class DoctorService {
     doctor.name = req.name;
     doctor.profile = req.profile;
     doctor.consulePrice = req.consulePrice;
+    doctor.specialization = specialization;
 
     const result = await this.doctorRepository.save(doctor);
 

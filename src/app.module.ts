@@ -18,6 +18,7 @@ import { StaffModule } from './module/staff/staff.module';
 import dataSource from './database/datasource';
 import { DoctorModule } from './module/doctor/doctor.module';
 import { RoomModule } from './module/room/room.module';
+import { SpecializationModule } from './module/specialization/specialization.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { RoomModule } from './module/room/room.module';
     StaffModule,
     DoctorModule,
     RoomModule,
+    SpecializationModule,
   ],
   controllers: [AppController],
   providers: [Logger],
