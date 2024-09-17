@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -58,7 +59,7 @@ export class Doctor {
   })
   specialization: Specialization;
 
-  @ManyToOne(() => DoctorQueue, (doctorqueue) => doctorqueue.id, {
+  @OneToMany(() => DoctorQueue, (doctorqueue) => doctorqueue.doctor, {
     nullable: true,
   })
   doctorqueue: DoctorQueue;

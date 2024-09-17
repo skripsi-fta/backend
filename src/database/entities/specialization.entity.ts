@@ -12,6 +12,9 @@ export class Specialization {
   @Column()
   description: string;
 
-  @OneToMany(() => Staff, (staff) => staff.id, { nullable: true })
+  @Column({ default: true })
+  isActive: boolean;
+
+  @OneToMany(() => Staff, (staff) => staff.specialization, { nullable: true })
   staffs: Staff[];
 }

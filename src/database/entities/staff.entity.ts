@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -10,6 +11,7 @@ import {
 } from 'typeorm';
 import { Schedule } from './schedule.entity';
 import { Doctor } from './doctor.entity';
+import { Specialization } from './specialization.entity';
 
 export enum StaffRole {
   DOCTOR = 'DOCTOR',
@@ -63,4 +65,9 @@ export class Staff {
 
   @OneToMany(() => Schedule, (schedule) => schedule.id, { nullable: true })
   schedules: Schedule[];
+
+  @ManyToOne(() => Specialization, (specialization) => specialization.staffs, {
+    nullable: true,
+  })
+  specialization: Specialization;
 }
