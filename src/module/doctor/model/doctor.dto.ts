@@ -15,7 +15,7 @@ export class DoctorPostDTO {
   @IsNumberString()
   consulePrice: number;
 
-  @IsNumber()
+  @IsNumberString()
   specializationId: number;
 }
 
