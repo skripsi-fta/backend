@@ -90,13 +90,13 @@ export class SpecializationController {
 
     if (!data) {
       return sendResponse(res, {
-        statusCode: 400,
+        statusCode: StatusCodes.BAD_REQUEST,
         message: 'Failed - PUT Specialization',
       });
     }
 
     return sendResponse(res, {
-      statusCode: 200,
+      statusCode: StatusCodes.OK,
       message: 'Success - PUT Specialization',
       data: data,
     });
