@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { LoggerService } from '../logger/logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Specialization } from 'src/database/entities/specialization.entity';
-import { Like, type Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import type {
@@ -42,8 +42,8 @@ export class SpecializationService {
       },
       where: {
         id: id ? id : undefined,
-        name: name ? Like(`%${name}%`) : undefined,
-        description: description ? Like(`%${description}%`) : undefined,
+        name: name ? ILike(`%${name}%`) : undefined,
+        description: description ? ILike(`%${description}%`) : undefined,
       },
     });
 
@@ -77,8 +77,6 @@ export class SpecializationService {
     });
 
     const result = await this.specializationRepository.save(data);
-
-    this.log.info(JSON.stringify(result));
 
     return result;
   }
