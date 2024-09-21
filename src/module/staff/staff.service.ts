@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { LoggerService } from '../logger/logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Staff } from 'src/database/entities/staff.entity';
-import { Like, Repository } from 'typeorm';
+import { ILike, Like, Repository } from 'typeorm';
 import { StaffPostDTO, StaffPutDTO } from './model/staff.dto';
 import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
@@ -36,7 +36,7 @@ export class StaffService {
       },
       where: {
         id: id ? id : undefined,
-        name: name ? Like(`%${name}%`) : undefined,
+        name: name ? ILike(`%${name}%`) : undefined,
         email: email ? Like(`%${email}%`) : undefined,
         role: role ? role.toUpperCase() : undefined,
       },

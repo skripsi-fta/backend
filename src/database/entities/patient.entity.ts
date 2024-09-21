@@ -16,6 +16,11 @@ export enum IdType {
   NATIONAL_ID = 'NATIONAL_ID',
 }
 
+export enum Gender {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+}
+
 @Entity()
 export class Patient {
   @PrimaryGeneratedColumn()
@@ -35,36 +40,35 @@ export class Patient {
   @Column({
     type: 'date',
   })
-  date_of_birth: Date;
+  dateOfBirth: Date;
 
   @Column({
     type: 'enum',
-    enum: ['MALE', 'FEMALE'],
+    enum: Gender,
   })
-  gender: string;
+  gender: Gender;
 
   @Column({
     type: 'enum',
     enum: IdType,
   })
-  id_type: IdType;
+  idType: IdType;
 
   @Column({
     type: 'varchar',
-    length: 25,
   })
-  id_number: string;
+  idNumber: string;
 
   @Column({
     type: 'varchar',
-    length: 50,
+    nullable: true,
   })
-  id_photo: string;
+  idPhoto: string;
 
   @Column({
-    default: false,
+    default: true,
   })
-  is_deleted: boolean;
+  isActive: boolean;
 
   @CreateDateColumn()
   created_at: Date;
