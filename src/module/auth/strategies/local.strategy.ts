@@ -2,15 +2,14 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
 import { AuthService } from '../auth.service';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class LocalStartegy extends PassportStrategy(Strategy) {
-  constructor(
-    private authService: AuthService,
-    private jwtService: JwtService,
-  ) {
+  constructor(private authService: AuthService) {
     super();
+    // {
+    //   usernameField: 'username';
+    // }
   }
 
   async validate(username: string, password: string) {
@@ -24,9 +23,6 @@ export class LocalStartegy extends PassportStrategy(Strategy) {
       //   );
     }
 
-    return {
-      jwtToken: this.jwtService.sign(user),
-      user,
-    };
+    return user;
   }
 }

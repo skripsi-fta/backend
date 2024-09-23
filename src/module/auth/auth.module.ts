@@ -7,15 +7,17 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStartegy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import jwtConfig from './config/jwt.config';
 
 @Module({
   imports: [
     PassportModule,
-    JwtModule.register({
-      // secret: config().jwt.accessSecret,
-      secret: 'secret123123',
-      signOptions: { expiresIn: '10s' },
-    }),
+    JwtModule.registerAsync(jwtConfig.asProvider()),
+    // JwtModule.register({
+    //   // secret: config().jwt.accessSecret,
+    //   secret: 'secret123123',
+    //   signOptions: { expiresIn: '10s' },
+    // }),
     TypeOrmModule.forFeature([Staff]),
   ],
   controllers: [AuthController],
