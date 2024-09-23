@@ -8,19 +8,19 @@ import { PassportModule } from '@nestjs/passport';
 import { LocalStartegy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import jwtConfig from './config/jwt.config';
+import { ConfigModule } from '@nestjs/config';
+import refreshJwtConfig from './config/refresh-jwt.config';
+import { RefreshJwtStrategy } from './strategies/refresh.strategy';
 
 @Module({
   imports: [
     PassportModule,
     JwtModule.registerAsync(jwtConfig.asProvider()),
-    // JwtModule.register({
-    //   // secret: config().jwt.accessSecret,
-    //   secret: 'secret123123',
-    //   signOptions: { expiresIn: '10s' },
-    // }),
+    ConfigModule.forFeature(jwtConfig),
+    ConfigModule.forFeature(refreshJwtConfig),
     TypeOrmModule.forFeature([Staff]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStartegy, JwtStrategy],
+  providers: [AuthService, LocalStartegy, JwtStrategy, RefreshJwtStrategy],
 })
 export class AuthModule {}

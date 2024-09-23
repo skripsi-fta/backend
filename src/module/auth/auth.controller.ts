@@ -2,18 +2,20 @@ import { Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { LocalGuard } from './guards/local.guards';
 import { Request } from 'express';
 import { JwtAuthGuard } from './guards/jwt.guards';
-import { JwtService } from '@nestjs/jwt';
+import { AuthService } from './auth.service';
+import { RefreshJwtGuard } from './guards/refresh-jwt.guards';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private jwtService: JwtService) {}
+  constructor(private authService: AuthService) {}
 
   @Post('login')
   @UseGuards(LocalGuard)
   async login(@Req() req: Request) {
-    console.log('req.user: ', req.user);
+    const login = await this.authService.login(req);
     return {
-      token: this.jwtService.sign(req.user),
+      token: login.token,
+      refreshToken: login.refreshToken,
       user: req.user,
     };
   }
@@ -23,5 +25,11 @@ export class AuthController {
   async status(@Req() req: Request) {
     console.log('req.user: ', req.user);
     return req.user;
+  }
+
+  @Get('refresh')
+  @UseGuards(RefreshJwtGuard)
+  async refresh(@Req() req: Request) {
+    return await this.authService.refreshToken(req);
   }
 }
