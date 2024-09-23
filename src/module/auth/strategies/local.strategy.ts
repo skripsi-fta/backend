@@ -7,9 +7,6 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 export class LocalStartegy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
     super();
-    // {
-    //   usernameField: 'username';
-    // }
   }
 
   async validate(username: string, password: string) {

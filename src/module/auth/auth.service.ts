@@ -34,13 +34,10 @@ export class AuthService {
     }
 
     return user;
-    // return this.jwtService.sign(user);
   }
 
   async login(req: Request) {
-    console.log('req.user: ', req.user);
     const token = this.jwtService.sign(req.user);
-    console.log(this.refreshTokenConfig);
     const refreshToken = this.jwtService.sign(
       req.user,
       this.refreshTokenConfig,
@@ -53,7 +50,6 @@ export class AuthService {
   }
 
   async refreshToken(req: Request) {
-    console.log('req.user: ', req.user);
     const token = this.jwtService.sign(req.user);
 
     return {
