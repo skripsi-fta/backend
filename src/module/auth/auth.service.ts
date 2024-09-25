@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import refreshJwtConfig from './config/refresh-jwt.config';
 import { ConfigType } from '@nestjs/config';
+import { comparePassword } from 'src/utils/bcrypt.utils';
 
 @Injectable()
 export class AuthService {
@@ -29,12 +30,17 @@ export class AuthService {
       return null;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, created_at, updated_at, ...user } = findUser;
+    const matchedPassword = await comparePassword(
+      req.password,
+      findUser.password,
+    );
 
-    if (password !== req.password) {
+    if (!matchedPassword) {
       return null;
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, created_at, updated_at, ...user } = findUser;
 
     return user;
   }

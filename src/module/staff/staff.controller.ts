@@ -22,7 +22,7 @@ import { Roles } from 'src/decorator/role.decorator';
 import { RoleGuard } from '../auth/guards/role.guards';
 
 @Controller('staff')
-@Roles(StaffRole.MANAGEMENT, StaffRole.CASHIER)
+@Roles(StaffRole.MANAGEMENT)
 @UseGuards(JwtAuthGuard, RoleGuard)
 export class StaffController {
   constructor(

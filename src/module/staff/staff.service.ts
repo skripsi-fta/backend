@@ -7,6 +7,7 @@ import { StaffPostDTO, StaffPutDTO } from './model/staff.dto';
 import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import { Doctor } from 'src/database/entities/doctor.entity';
+import { encodePassword } from 'src/utils/bcrypt.utils';
 
 @Injectable()
 export class StaffService {
@@ -66,6 +67,8 @@ export class StaffService {
         StatusCodes.CONFLICT,
       );
     }
+
+    data.password = await encodePassword(data.password);
 
     if (data.role === 'DOCTOR') {
       if (!data.doctorId) {
