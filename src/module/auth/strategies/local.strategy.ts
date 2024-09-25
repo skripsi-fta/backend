@@ -13,11 +13,7 @@ export class LocalStartegy extends PassportStrategy(Strategy) {
     const user = await this.authService.validateUser({ username, password });
 
     if (!user) {
-      throw new UnauthorizedException('Failed - Invalid username or password');
-      //   throw new ResponseError(
-      //     'Failed - Invalid username or password',
-      //     StatusCodes.UNAUTHORIZED,
-      //   );
+      throw new UnauthorizedException('Invalid username or password');
     }
 
     return user;

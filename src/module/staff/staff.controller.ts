@@ -8,6 +8,7 @@ import {
   Put,
   Query,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { LoggerService } from '../logger/logger.service';
 import { sendResponse } from 'src/utils/api.utils';
@@ -16,8 +17,10 @@ import { StaffPostDTO, StaffPutDTO } from './model/staff.dto';
 import { StaffService } from './staff.service';
 import { StatusCodes } from 'http-status-codes';
 import { StaffRole } from 'src/database/entities/staff.entity';
+import { JwtAuthGuard } from '../auth/guards/jwt.guards';
 
 @Controller('staff')
+@UseGuards(JwtAuthGuard)
 export class StaffController {
   constructor(
     private log: LoggerService,

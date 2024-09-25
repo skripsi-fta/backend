@@ -13,6 +13,7 @@ export class AuthController {
   @UseGuards(LocalGuard)
   async login(@Req() req: Request) {
     const login = await this.authService.login(req);
+
     return {
       token: login.token,
       refreshToken: login.refreshToken,
@@ -20,7 +21,7 @@ export class AuthController {
     };
   }
 
-  @Get('status')
+  @Get('profile')
   @UseGuards(JwtAuthGuard)
   async status(@Req() req: Request) {
     return req.user;
