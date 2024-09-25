@@ -18,9 +18,12 @@ import { StaffService } from './staff.service';
 import { StatusCodes } from 'http-status-codes';
 import { StaffRole } from 'src/database/entities/staff.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt.guards';
+import { Roles } from 'src/decorator/role.decorator';
+import { RoleGuard } from '../auth/guards/role.guards';
 
 @Controller('staff')
-@UseGuards(JwtAuthGuard)
+@Roles('MANAGEMENT')
+@UseGuards(JwtAuthGuard, RoleGuard)
 export class StaffController {
   constructor(
     private log: LoggerService,
