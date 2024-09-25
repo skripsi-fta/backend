@@ -20,6 +20,9 @@ export class PatientService {
     pageNumber: number,
     id: number,
     name: string,
+    gender: string,
+    idType: string,
+    idNumber: string,
   ) {
     const [data, count] = await this.patientRepository.findAndCount({
       skip: (pageNumber - 1) * pageSize,
@@ -30,6 +33,9 @@ export class PatientService {
       where: {
         id: id ? id : undefined,
         name: name ? ILike(`%${name}%`) : undefined,
+        gender: gender || undefined,
+        idType: idType || undefined,
+        idNumber: idNumber ? ILike(`${idNumber}%`) : undefined,
       },
     });
 
@@ -41,7 +47,7 @@ export class PatientService {
         address: patient.address,
         dateOfBirth: patient.dateOfBirth,
         gender: patient.gender,
-        IdType: patient.idType,
+        idType: patient.idType,
         idNumber: patient.idNumber,
       })),
     };
@@ -95,7 +101,9 @@ export class PatientService {
     patientExist.gender = req.gender;
     patientExist.idType = req.idType;
     patientExist.idNumber = req.idNumber;
-    patientExist.idPhoto = req.idPhoto;
+
+    // TODO: enable if upload completed
+    // patientExist.idPhoto = req.idPhoto;
 
     const result = await this.patientRepository.save(patientExist);
 

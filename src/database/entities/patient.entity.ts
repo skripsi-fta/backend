@@ -46,13 +46,13 @@ export class Patient {
     type: 'enum',
     enum: Gender,
   })
-  gender: Gender;
+  gender: string;
 
   @Column({
     type: 'enum',
     enum: IdType,
   })
-  idType: IdType;
+  idType: string;
 
   @Column({
     type: 'varchar',

@@ -20,6 +20,7 @@ import { DoctorModule } from './module/doctor/doctor.module';
 import { RoomModule } from './module/room/room.module';
 import { SpecializationModule } from './module/specialization/specialization.module';
 import { PatientModule } from './module/patient/patient.module';
+import { AuthModule } from './module/auth/auth.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { PatientModule } from './module/patient/patient.module';
     RoomModule,
     PatientModule,
     SpecializationModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [Logger],
