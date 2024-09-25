@@ -43,7 +43,7 @@ async function bootstrap() {
   app.setGlobalPrefix('v1');
 
   await app.listen(configService.get<number>('port'));
-  logger.info(`Backend is running on: ${await app.getUrl()}`);
+  logger.info(`Backend is running on: ${await app.getUrl()}/v1`);
 }
 
 bootstrap();
