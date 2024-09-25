@@ -27,8 +27,9 @@ export class PatientPostDTO {
   @IsString()
   idNumber: string;
 
-  @IsString()
-  idPhoto: string;
+  // TODO: enable if upload completed
+  //   @IsString()
+  //   idPhoto: string;
 }
 
 export class PatientPutDTO {
@@ -53,6 +54,7 @@ export class PatientPutDTO {
   @IsString()
   idNumber: string;
 
-  @IsString()
-  idPhoto: string;
+  // TODO: enable if upload completed
+  //   @IsString()
+  //   idPhoto: string;
 }
