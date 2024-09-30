@@ -5,7 +5,7 @@ import { JwtAuthGuard } from './guards/jwt.guards';
 import { AuthService } from './auth.service';
 import { RefreshJwtGuard } from './guards/refresh-jwt.guards';
 
-@Controller('auth')
+@Controller('')
 export class AuthController {
   constructor(private authService: AuthService) {}
 

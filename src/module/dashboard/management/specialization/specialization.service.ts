@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { LoggerService } from '../logger/logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Specialization } from 'src/database/entities/specialization.entity';
 import { ILike, Repository } from 'typeorm';
@@ -10,6 +9,7 @@ import type {
   SpecializationSwitchDTO,
   SpecializationUpdateDTO,
 } from './model/specialization.dto';
+import { LoggerService } from 'src/module/logger/logger.service';
 
 @Injectable()
 export class SpecializationService {

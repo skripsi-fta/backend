@@ -1,26 +1,21 @@
 import {
   Logger,
-  MiddlewareConsumer,
   Module,
-  NestModule,
+  type MiddlewareConsumer,
+  type NestModule,
   RequestMethod,
 } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 import { loggerData } from './utils/logger.util';
-import { LoggerMiddleware } from './middleware/logger.middleware';
 import { HealthcheckModule } from './module/healthcheck/healthcheck.module';
 import { LoggerModule } from './module/logger/logger.module';
 import config from './config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { StaffModule } from './module/staff/staff.module';
 import dataSource from './database/datasource';
-import { DoctorModule } from './module/doctor/doctor.module';
-import { RoomModule } from './module/room/room.module';
-import { SpecializationModule } from './module/specialization/specialization.module';
-import { PatientModule } from './module/patient/patient.module';
-import { AuthModule } from './module/auth/auth.module';
+import { DashboardModule } from './module/dashboard/dashboard.module';
+import { LoggerMiddleware } from './middleware/logger.middleware';
 
 @Module({
   imports: [
@@ -37,12 +32,7 @@ import { AuthModule } from './module/auth/auth.module';
     WinstonModule.forRoot(loggerData),
     HealthcheckModule,
     LoggerModule,
-    StaffModule,
-    DoctorModule,
-    RoomModule,
-    PatientModule,
-    SpecializationModule,
-    AuthModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [Logger],

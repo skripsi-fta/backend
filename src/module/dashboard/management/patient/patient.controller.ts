@@ -8,6 +8,7 @@ import {
   Put,
   Query,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { PatientService } from './patient.service';
 import { sendResponse } from 'src/utils/api.utils';
@@ -15,8 +16,14 @@ import { StatusCodes } from 'http-status-codes';
 import { Response } from 'express';
 import { PatientPostDTO, PatientPutDTO } from './model/patient.dto';
 import { Gender, IdType } from 'src/database/entities/patient.entity';
+import { RoleGuard } from '../../auth/guards/role.guards';
+import { JwtAuthGuard } from '../../auth/guards/jwt.guards';
+import { Roles } from 'src/decorator/role.decorator';
+import { StaffRole } from 'src/database/entities/staff.entity';
 
-@Controller('patient')
+@Controller('')
+@Roles(StaffRole.MANAGEMENT)
+@UseGuards(JwtAuthGuard, RoleGuard)
 export class PatientController {
   constructor(private patientService: PatientService) {}
 

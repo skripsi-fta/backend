@@ -8,14 +8,21 @@ import {
   Put,
   Query,
   Res,
+  UseGuards,
 } from '@nestjs/common';
-import { LoggerService } from '../logger/logger.service';
 import { sendResponse } from 'src/utils/api.utils';
 import { Response } from 'express';
 import { DoctorService } from './doctor.service';
 import { DoctorPostDTO, DoctorPutDTO } from './model/doctor.dto';
+import { LoggerService } from 'src/module/logger/logger.service';
+import { StaffRole } from 'src/database/entities/staff.entity';
+import { JwtAuthGuard } from '../../auth/guards/jwt.guards';
+import { RoleGuard } from '../../auth/guards/role.guards';
+import { Roles } from 'src/decorator/role.decorator';
 
-@Controller('doctor')
+@Controller('')
+@Roles(StaffRole.MANAGEMENT)
+@UseGuards(JwtAuthGuard, RoleGuard)
 export class DoctorController {
   constructor(
     private log: LoggerService,

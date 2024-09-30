@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { LoggerService } from '../logger/logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Staff } from 'src/database/entities/staff.entity';
 import { ILike, Like, Repository } from 'typeorm';
@@ -8,6 +7,7 @@ import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import { Doctor } from 'src/database/entities/doctor.entity';
 import { encodePassword } from 'src/utils/bcrypt.utils';
+import { LoggerService } from 'src/module/logger/logger.service';
 
 @Injectable()
 export class StaffService {
