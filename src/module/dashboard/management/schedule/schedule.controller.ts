@@ -11,8 +11,8 @@ import { LoggerService } from 'src/module/logger/logger.service';
 export class ScheduleManagementController {
   constructor(private log: LoggerService) {}
 
-  @Get()
-  async get() {
+  @Get('/fixed')
+  async getFixedSchedule() {
     console.log('tes');
   }
 }

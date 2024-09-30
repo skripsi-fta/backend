@@ -5,6 +5,7 @@ import { FixedSchedule } from 'src/database/entities/fixedschedule.entity';
 import { Schedule } from 'src/database/entities/schedule.entity';
 import { LoggerModule } from 'src/module/logger/logger.module';
 import { ScheduleManagementController } from './schedule.controller';
+import { ScheduleManagementService } from './schedule.service';
 
 @Module({
   imports: [
@@ -12,5 +13,6 @@ import { ScheduleManagementController } from './schedule.controller';
     TypeOrmModule.forFeature([Doctor, Schedule, FixedSchedule]),
   ],
   controllers: [ScheduleManagementController],
+  providers: [ScheduleManagementService],
 })
 export class ScheduleManagementModule {}
