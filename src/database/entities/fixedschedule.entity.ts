@@ -1,8 +1,15 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Doctor } from './doctor.entity';
 import { Room } from './room.entity';
 
 @Entity()
+@Index(['day', 'startTime', 'endTime', 'room'], { unique: true })
 export class FixedSchedule {
   @PrimaryGeneratedColumn()
   id: number;
@@ -20,6 +27,12 @@ export class FixedSchedule {
     ],
   })
   day: string;
+
+  @Column()
+  startTime: string;
+
+  @Column()
+  endTime: string;
 
   @ManyToOne(() => Doctor, (doctor) => doctor.id)
   doctor: Doctor;

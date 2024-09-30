@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Schedule } from './schedule.entity';
 import { FixedSchedule } from './fixedschedule.entity';
+import { ScheduleTemp } from './scheduletemp.entity';
 
 @Entity()
 export class Room {
@@ -20,6 +21,9 @@ export class Room {
 
   @OneToMany(() => Schedule, (schedule) => schedule.id)
   schedules: Schedule[];
+
+  @OneToMany(() => ScheduleTemp, (scheduleTemp) => scheduleTemp.id)
+  scheduleTemp: ScheduleTemp[];
 
   @OneToMany(() => FixedSchedule, (fixedSchedule) => fixedSchedule.id)
   fixedSchedules: FixedSchedule[];
