@@ -9,12 +9,12 @@ export class CashierQueue {
   @Column({
     type: 'time',
   })
-  start_time: Date;
+  startTime: Date;
 
   @Column({
     type: 'time',
   })
-  finish_time: Date;
+  finishTime: Date;
 
   @Column({
     type: 'date',

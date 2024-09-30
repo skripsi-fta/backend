@@ -4,12 +4,10 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Schedule } from './schedule.entity';
 import { Doctor } from './doctor.entity';
 import { Specialization } from './specialization.entity';
 
@@ -52,19 +50,16 @@ export class Staff {
   role: string;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({
     nullable: true,
   })
-  updated_at: Date;
+  updatedAt: Date;
 
   @OneToOne(() => Doctor, (doctor) => doctor.id, { nullable: true })
   @JoinColumn()
   doctor: Doctor;
-
-  @OneToMany(() => Schedule, (schedule) => schedule.id, { nullable: true })
-  schedules: Schedule[];
 
   @ManyToOne(() => Specialization, (specialization) => specialization.staffs, {
     nullable: true,

@@ -19,11 +19,11 @@ export class Appointment {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({})
-  booking_code: string;
+  @Column({ nullable: false })
+  bookingCode: string;
 
-  @Column({})
-  booking_qr: string;
+  @Column({ nullable: false })
+  bookingQr: string;
 
   @Column({
     type: 'enum',
@@ -38,22 +38,22 @@ export class Appointment {
     ],
     default: 'scheduled',
   })
-  appointment_status: string;
+  appointmentStatus: string;
 
   @Column({ default: false })
-  is_check_in: boolean;
+  isCheckIn: boolean;
 
   @Column({
     type: 'time',
     nullable: true,
   })
-  check_in_time: Date;
+  checkInTime: Date;
 
   @Column({
     type: 'time',
     nullable: true,
   })
-  finish_time: Date;
+  finishTime: Date;
 
   @Column({
     type: 'decimal',
@@ -61,54 +61,52 @@ export class Appointment {
     scale: 2,
     nullable: true,
   })
-  consultation_fee: number;
+  consultationFee: number;
 
   @Column({
     type: 'decimal',
     precision: 10,
     scale: 2,
   })
-  pharmacy_fee: number;
+  pharmacyFee: number;
 
-  @Column({
-    type: 'decimal',
-    precision: 10,
-    scale: 2,
-    nullable: true,
-  })
-  admin_fee: number;
+  @Column()
+  notes: string;
+
+  @Column()
+  rating: number;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({
     nullable: true,
   })
-  updated_at: Date;
+  updatedAt: Date;
 
   @OneToOne(() => MedicalRecord, (medicalRecord) => medicalRecord.id, {
     nullable: true,
   })
   @JoinColumn()
-  medical_record: MedicalRecord;
+  medicalRecord: MedicalRecord;
 
   @OneToOne(() => DoctorQueue, (doctorQueue) => doctorQueue.id, {
     nullable: true,
   })
   @JoinColumn()
-  doctor_queue: DoctorQueue;
+  doctorQueue: DoctorQueue;
 
   @OneToOne(() => PharmacyQueue, (pharmacyQueue) => pharmacyQueue.id, {
     nullable: true,
   })
   @JoinColumn()
-  pharmacy_queue: PharmacyQueue;
+  pharmacyQueue: PharmacyQueue;
 
   @OneToOne(() => CashierQueue, (cashierQueue) => cashierQueue.id, {
     nullable: true,
   })
   @JoinColumn()
-  cashier_queue: CashierQueue;
+  cashierQueue: CashierQueue;
 
   @ManyToOne(() => Schedule, (schedule) => schedule.id)
   schedule: Schedule;

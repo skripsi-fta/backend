@@ -11,6 +11,8 @@ import {
 import { Specialization } from './specialization.entity';
 import { Staff } from './staff.entity';
 import { DoctorQueue } from './doctorqueue.entity';
+import { Schedule } from './schedule.entity';
+import { FixedSchedule } from './fixedschedule.entity';
 
 @Entity()
 export class Doctor {
@@ -62,5 +64,11 @@ export class Doctor {
   @OneToMany(() => DoctorQueue, (doctorqueue) => doctorqueue.doctor, {
     nullable: true,
   })
-  doctorqueue: DoctorQueue;
+  doctorQueue: DoctorQueue;
+
+  @OneToMany(() => Schedule, (schedule) => schedule.id)
+  schedules: Schedule[];
+
+  @OneToMany(() => FixedSchedule, (fixedSchedule) => fixedSchedule.id)
+  fixedSchedules: FixedSchedule[];
 }

@@ -2,15 +2,16 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Appointment } from './appointment.entitity';
 import { Room } from './room.entity';
-import { TimeSlot } from './timeslot.entitity';
-import { Staff } from './staff.entity';
+import { Doctor } from './doctor.entity';
 
 @Entity()
 export class Schedule {
@@ -27,31 +28,33 @@ export class Schedule {
 
   @Column({
     type: 'enum',
-    enum: ['ready', 'full', 'cancelled'],
+    enum: ['ready', 'in review', 'cancelled', 'changed'],
   })
   status: string;
 
-  @Column({
-    nullable: true,
-  })
-  moved_to: number;
+  @OneToOne(() => Schedule, { nullable: true })
+  @JoinColumn()
+  movedTo: number;
+
+  @Column()
+  startTime: string;
+
+  @Column()
+  endTime: string;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({
     nullable: true,
   })
-  updated_at: Date;
+  updatedAt: Date;
 
   @ManyToOne(() => Room, (room) => room.id)
   room: Room;
 
-  @ManyToOne(() => TimeSlot, (timeslot) => timeslot.id)
-  timeslot: TimeSlot;
-
-  @ManyToOne(() => Staff, (staff) => staff.id)
-  staff: Staff;
+  @ManyToOne(() => Doctor, (doctor) => doctor.id)
+  doctor: Doctor;
 
   @OneToMany(() => Appointment, (appointment) => appointment.id)
   Appointments: Appointment[];

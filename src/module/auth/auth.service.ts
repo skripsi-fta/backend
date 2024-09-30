@@ -40,7 +40,7 @@ export class AuthService {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, created_at, updated_at, ...user } = findUser;
+    const { password, createdAt, updatedAt, ...user } = findUser;
 
     return user;
   }

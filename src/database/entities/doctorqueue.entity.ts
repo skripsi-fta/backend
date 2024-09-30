@@ -14,24 +14,24 @@ export class DoctorQueue {
   id: number;
 
   @Column()
-  queue_number: number;
+  queueNumber: number;
 
   @Column({
     type: 'time',
   })
-  start_time: Date;
+  startTime: Date;
 
   @Column({
     type: 'time',
   })
-  finish_time: Date;
+  finishTime: Date;
 
   @Column({
     type: 'date',
   })
   date: Date;
 
-  @ManyToOne(() => Doctor, (doctor) => doctor.doctorqueue)
+  @ManyToOne(() => Doctor, (doctor) => doctor.doctorQueue)
   doctor: Doctor;
 
   @OneToOne(() => Appointment, (appointment) => appointment.id)

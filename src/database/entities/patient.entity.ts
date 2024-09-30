@@ -71,12 +71,12 @@ export class Patient {
   isActive: boolean;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({
     nullable: true,
   })
-  updated_at: Date;
+  updatedAt: Date;
 
   @OneToOne(() => Auth, (auth) => auth.patient, { nullable: true })
   auth: Auth;
