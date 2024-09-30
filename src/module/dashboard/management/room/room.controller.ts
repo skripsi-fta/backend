@@ -8,15 +8,22 @@ import {
   Put,
   Query,
   Res,
+  UseGuards,
 } from '@nestjs/common';
-import { LoggerService } from '../logger/logger.service';
 import { RoomService } from './room.service';
 import { sendResponse } from 'src/utils/api.utils';
 import { Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { RoomPostDTO, RoomPutDTO } from './model/room.dto';
+import { LoggerService } from 'src/module/logger/logger.service';
+import { RoleGuard } from '../../auth/guards/role.guards';
+import { JwtAuthGuard } from '../../auth/guards/jwt.guards';
+import { Roles } from 'src/decorator/role.decorator';
+import { StaffRole } from 'src/database/entities/staff.entity';
 
-@Controller('room')
+@Controller('')
+@Roles(StaffRole.MANAGEMENT)
+@UseGuards(JwtAuthGuard, RoleGuard)
 export class RoomController {
   constructor(
     private log: LoggerService,

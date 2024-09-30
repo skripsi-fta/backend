@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { LoggerService } from '../logger/logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 import { Room } from 'src/database/entities/room.entity';
 import { RoomPostDTO, RoomPutDTO } from './model/room.dto';
 import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
+import { LoggerService } from 'src/module/logger/logger.service';
 
 @Injectable()
 export class RoomService {

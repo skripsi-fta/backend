@@ -3,7 +3,7 @@ import { Specialization } from 'src/database/entities/specialization.entity';
 import { SpecializationController } from './specialization.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SpecializationService } from './specialization.service';
-import { LoggerModule } from '../logger/logger.module';
+import { LoggerModule } from 'src/module/logger/logger.module';
 
 @Module({
   imports: [LoggerModule, TypeOrmModule.forFeature([Specialization])],

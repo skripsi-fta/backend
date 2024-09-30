@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { LoggerService } from '../logger/logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 import { Doctor } from 'src/database/entities/doctor.entity';
@@ -7,6 +6,7 @@ import { DoctorPostDTO, DoctorPutDTO } from './model/doctor.dto';
 import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import { Specialization } from 'src/database/entities/specialization.entity';
+import { LoggerService } from 'src/module/logger/logger.service';
 
 @Injectable()
 export class DoctorService {

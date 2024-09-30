@@ -7,8 +7,8 @@ import {
   Put,
   Query,
   Res,
+  UseGuards,
 } from '@nestjs/common';
-import { LoggerService } from '../logger/logger.service';
 import { SpecializationService } from './specialization.service';
 import { sendResponse } from 'src/utils/api.utils';
 import { Response } from 'express';
@@ -18,8 +18,15 @@ import {
   SpecializationSwitchDTO,
   SpecializationUpdateDTO,
 } from './model/specialization.dto';
+import { LoggerService } from 'src/module/logger/logger.service';
+import { RoleGuard } from '../../auth/guards/role.guards';
+import { JwtAuthGuard } from '../../auth/guards/jwt.guards';
+import { Roles } from 'src/decorator/role.decorator';
+import { StaffRole } from 'src/database/entities/staff.entity';
 
-@Controller('specialization')
+@Controller('')
+@Roles(StaffRole.MANAGEMENT)
+@UseGuards(JwtAuthGuard, RoleGuard)
 export class SpecializationController {
   constructor(
     private log: LoggerService,
