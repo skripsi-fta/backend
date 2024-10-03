@@ -41,6 +41,93 @@ export class ScheduleManagementService {
     private readonly dataSource: DataSource,
   ) {}
 
+  async getSchedule({
+    date,
+    startTime,
+    endTime,
+    doctorId,
+    roomId,
+    pageSize,
+    pageNumber,
+    status,
+    startDate,
+    endDate,
+  }: {
+    date: string;
+    startTime: string;
+    endTime: string;
+    doctorId: number;
+    roomId: number;
+    status: string;
+    pageSize: number;
+    pageNumber: number;
+    startDate: string;
+    endDate: string;
+  }) {
+    let where: FindOptionsWhere<Schedule> = {};
+
+    if (startTime && endTime) {
+      where = { startTime: Between(startTime, endTime) };
+    } else if (startTime) {
+      where = { startTime: Between(startTime, '23:59:59') };
+    } else if (endTime) {
+      where = { startTime: Between('00:00', endTime) };
+    }
+
+    if (startDate || endDate) {
+      where = {
+        ...where,
+        date: Between(
+          dayjs(startDate, 'YYYY-MM-DD').toDate(),
+          dayjs(endDate, 'YYYY-MM-DD').toDate(),
+        ),
+      };
+    } else {
+      where = {
+        ...where,
+        date: dayjs(date, 'YYYY-MM-DD').toDate() || undefined,
+      };
+    }
+
+    const [data, count] = await this.scheduleRepository.findAndCount({
+      select: {
+        capacity: true,
+        date: true,
+        endTime: true,
+        id: true,
+        startTime: true,
+        status: true,
+        type: true,
+      },
+      relations: {
+        doctor: {
+          specialization: true,
+        },
+        room: true,
+      },
+      skip: (pageNumber - 1) * pageSize,
+      take: pageSize,
+      order: {
+        id: 'ASC',
+      },
+      where: {
+        doctor: doctorId ? { id: doctorId } : undefined,
+        room: roomId ? { id: roomId } : undefined,
+        status: status || undefined,
+        ...where,
+      },
+    });
+
+    return {
+      totalRows: count,
+      list: data.map((d) => ({
+        ...d,
+        startTime: d.startTime.substring(0, 5),
+        endTime: d.endTime.substring(0, 5),
+      })),
+    };
+  }
+
   async getFixedSchedule({
     day,
     doctorId,

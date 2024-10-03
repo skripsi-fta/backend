@@ -33,6 +33,44 @@ export class ScheduleManagementController {
     private scheduleService: ScheduleManagementService,
   ) {}
 
+  @Get()
+  async getSchedule(
+    @Res() res: Response,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+    @Query('date') date: string,
+    @Query('startTime') startTime: string,
+    @Query('endTime') endTime: string,
+    @Query('doctorId') doctorId: number,
+    @Query('roomId') roomId: number,
+    @Query('status') status: string,
+    @Query('pageSize', new DefaultValuePipe(0))
+    pageSize: number,
+    @Query('pageNumber', new DefaultValuePipe(1)) pageNumber: number,
+  ) {
+    const data = await this.scheduleService.getSchedule({
+      date,
+      doctorId,
+      endTime,
+      pageNumber,
+      pageSize,
+      roomId,
+      startTime,
+      status,
+      endDate,
+      startDate,
+    });
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      message: 'Success - GET Schedule',
+      pageSize: Number(pageSize) || 0,
+      pageNumber: Number(pageNumber) || 1,
+      totalRows: data.totalRows,
+      data: data.list,
+    });
+  }
+
   @Get('fixed')
   async getFixedSchedule(
     @Res() res: Response,
