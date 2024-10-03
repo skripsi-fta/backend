@@ -13,9 +13,10 @@ import {
 import { Appointment } from './appointment.entitity';
 import { Room } from './room.entity';
 import { Doctor } from './doctor.entity';
+import { FixedSchedule } from './fixedschedule.entity';
 
 @Entity()
-@Index(['date', 'startTime', 'endTime', 'room', 'doctor'], { unique: true })
+@Index(['date', 'startTime', 'endTime', 'room'], { unique: true })
 export class Schedule {
   @PrimaryGeneratedColumn()
   id: number;
@@ -38,11 +39,14 @@ export class Schedule {
   @JoinColumn()
   movedTo: number;
 
-  @Column()
+  @Column({ type: 'time' })
   startTime: string;
 
-  @Column()
+  @Column({ type: 'time' })
   endTime: string;
+
+  @Column({ type: 'enum', enum: ['special', 'regular'] })
+  type: string;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -58,6 +62,11 @@ export class Schedule {
   @ManyToOne(() => Doctor, (doctor) => doctor.id)
   doctor: Doctor;
 
-  @OneToMany(() => Appointment, (appointment) => appointment.id)
-  Appointments: Appointment[];
+  @OneToMany(() => Appointment, (appointment) => appointment.schedule)
+  appointments: Appointment[];
+
+  @ManyToOne(() => FixedSchedule, (FixedSchedule) => FixedSchedule.id, {
+    nullable: true,
+  })
+  fixedSchedule: FixedSchedule;
 }

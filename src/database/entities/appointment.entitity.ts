@@ -2,7 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -13,6 +12,7 @@ import { DoctorQueue } from './doctorqueue.entity';
 import { PharmacyQueue } from './pharmacyqueue.entity';
 import { CashierQueue } from './cashierqueue.entity';
 import { Schedule } from './schedule.entity';
+import { Patient } from './patient.entity';
 
 @Entity()
 export class Appointment {
@@ -67,13 +67,14 @@ export class Appointment {
     type: 'decimal',
     precision: 10,
     scale: 2,
+    nullable: true,
   })
   pharmacyFee: number;
 
-  @Column()
+  @Column({ nullable: true })
   notes: string;
 
-  @Column()
+  @Column({ nullable: true })
   rating: number;
 
   @CreateDateColumn()
@@ -87,27 +88,26 @@ export class Appointment {
   @OneToOne(() => MedicalRecord, (medicalRecord) => medicalRecord.id, {
     nullable: true,
   })
-  @JoinColumn()
   medicalRecord: MedicalRecord;
 
   @OneToOne(() => DoctorQueue, (doctorQueue) => doctorQueue.id, {
     nullable: true,
   })
-  @JoinColumn()
   doctorQueue: DoctorQueue;
 
   @OneToOne(() => PharmacyQueue, (pharmacyQueue) => pharmacyQueue.id, {
     nullable: true,
   })
-  @JoinColumn()
   pharmacyQueue: PharmacyQueue;
 
   @OneToOne(() => CashierQueue, (cashierQueue) => cashierQueue.id, {
     nullable: true,
   })
-  @JoinColumn()
   cashierQueue: CashierQueue;
 
   @ManyToOne(() => Schedule, (schedule) => schedule.id)
   schedule: Schedule;
+
+  @ManyToOne(() => Patient, (patient) => patient.id)
+  patient: Patient;
 }
