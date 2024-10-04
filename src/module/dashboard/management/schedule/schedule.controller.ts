@@ -22,6 +22,7 @@ import { ScheduleDay } from 'src/database/entities/fixedschedule.entity';
 import type {
   FixedScheduleCreateDTO,
   FixedScheduleUpdateDTO,
+  ScheduleCreateDTO,
 } from './model/schedule.dto';
 
 @Controller('')
@@ -68,6 +69,17 @@ export class ScheduleManagementController {
       pageNumber: Number(pageNumber) || 1,
       totalRows: data.totalRows,
       data: data.list,
+    });
+  }
+
+  @Post('')
+  async createSchedule(@Res() res: Response, @Body() body: ScheduleCreateDTO) {
+    const data = await this.scheduleService.createSchedule(body);
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.CREATED,
+      message: 'Success - Add Schedule',
+      data: data,
     });
   }
 

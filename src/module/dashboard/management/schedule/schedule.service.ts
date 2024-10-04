@@ -18,6 +18,7 @@ import {
 import type {
   FixedScheduleCreateDTO,
   FixedScheduleUpdateDTO,
+  ScheduleCreateDTO,
 } from './model/schedule.dto';
 import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
@@ -40,6 +41,24 @@ export class ScheduleManagementService {
     private readonly appointmentRepository: Repository<Appointment>,
     private readonly dataSource: DataSource,
   ) {}
+
+  async checkScheduleOverlap(
+    date: Date,
+    startTime: string,
+    endTime: string,
+    roomId: number,
+  ): Promise<boolean> {
+    const conflictingSchedule = await this.scheduleRepository.findOne({
+      where: {
+        date,
+        room: { id: roomId },
+        startTime: LessThan(endTime),
+        endTime: MoreThan(startTime),
+      },
+    });
+
+    return !!conflictingSchedule;
+  }
 
   async getSchedule({
     date,
@@ -194,6 +213,8 @@ export class ScheduleManagementService {
 
     const endDate = startDate.add(4, 'weeks');
 
+    const skippedSchedule: string[] = [];
+
     for (
       let date = startDate;
       date.isBefore(endDate);
@@ -203,6 +224,20 @@ export class ScheduleManagementService {
 
       if (dayToday === ScheduleDayNumber[fixedSchedule.day]) {
         const queryRunner = this.dataSource.createQueryRunner();
+
+        const isScheduleOverlap = await this.checkScheduleOverlap(
+          date.toDate(),
+          fixedSchedule.startTime,
+          fixedSchedule.endTime,
+          fixedSchedule.room.id,
+        );
+
+        if (isScheduleOverlap) {
+          skippedSchedule.push(
+            `${date.format('DD-MM-YYYY')} ${fixedSchedule.startTime.substring(0, 5)} - ${fixedSchedule.endTime.substring(0, 5)}`,
+          );
+          continue;
+        }
 
         const schedule = this.scheduleRepository.create({
           capacity: fixedSchedule.capacity,
@@ -244,7 +279,7 @@ export class ScheduleManagementService {
 
     await this.fixedScheduleRepository.save(fixedSchedule);
 
-    return schedules;
+    return { schedules, skippedSchedule };
   }
 
   async createFixedSchedule(body: FixedScheduleCreateDTO) {
@@ -269,7 +304,11 @@ export class ScheduleManagementService {
 
       const schedules = await this.generateSchedule(result);
 
-      return { schedules, fixedSchedule: result };
+      return {
+        schedules: schedules.schedules,
+        fixedSchedule: result,
+        skippedSchedule: schedules.skippedSchedule,
+      };
     } catch (e) {
       if (e instanceof QueryFailedError) {
         if ((e as any).code === '23505') {
@@ -312,7 +351,7 @@ export class ScheduleManagementService {
       // If not override schedule, the schedule that created is not updated and will be sync the next month
       if (!body.isOverrideSchedule) {
         await this.fixedScheduleRepository.save(fixedSchedule);
-        return fixedSchedule;
+        return { fixedSchedule };
       }
 
       // Override Schedule -> Create New Schedule -> Create New Appointment from old schedule
@@ -338,18 +377,41 @@ export class ScheduleManagementService {
 
       const queryRunner = this.dataSource.createQueryRunner();
 
+      const skippedSchedule: string[] = [];
+
+      const changedSchedule: string[] = [];
+
       try {
         const dayToday = dayjs().startOf('day');
 
         for (let i = 0; i < schedules.length; i++) {
           const oldSchedule = schedules[i];
 
-          await queryRunner.startTransaction();
-
           const changedToDate = findDateInSameWeek(
             dayjs(oldSchedule.date),
             fixedSchedule.day,
           );
+
+          const isScheduleOverlap = await this.checkScheduleOverlap(
+            changedToDate.toDate(),
+            fixedSchedule.startTime,
+            fixedSchedule.endTime,
+            fixedSchedule.room.id,
+          );
+
+          if (isScheduleOverlap) {
+            skippedSchedule.push(
+              `${changedToDate.format('DD-MM-YYYY')} ${fixedSchedule.startTime.substring(0, 5)} - ${fixedSchedule.endTime.substring(0, 5)}`,
+            );
+
+            continue;
+          }
+
+          changedSchedule.push(
+            `${dayjs(oldSchedule.date).format('DD-MM-YYYY')} -> ${changedToDate.format('DD-MM-YYYY')} ${fixedSchedule.startTime.substring(0, 5)} - ${fixedSchedule.endTime.substring(0, 5)}`,
+          );
+
+          await queryRunner.startTransaction();
 
           if (changedToDate.isBefore(dayToday)) {
             continue;
@@ -405,7 +467,7 @@ export class ScheduleManagementService {
         throw e;
       }
 
-      return fixedSchedule;
+      return { fixedSchedule, skippedSchedule, changedSchedule };
     } catch (e) {
       if (e instanceof QueryFailedError) {
         if ((e as any).code === '23505') {
@@ -426,6 +488,8 @@ export class ScheduleManagementService {
 
     let newSchedulesCount = 0;
 
+    let skippedSchedule: string[] = [];
+
     const fixedSchedules = await this.fixedScheduleRepository.find({
       where: {
         syncDate: LessThan(lastUpdateDaysAgo),
@@ -437,13 +501,55 @@ export class ScheduleManagementService {
     });
 
     for (let i = 0; i < fixedSchedules.length; i++) {
+      const generatedSchedules = await this.generateSchedule(fixedSchedules[i]);
+
       newSchedulesCount =
-        newSchedulesCount +
-        (await this.generateSchedule(fixedSchedules[i])).length;
+        newSchedulesCount + generatedSchedules.schedules.length;
+
+      skippedSchedule = [
+        ...skippedSchedule,
+        ...generatedSchedules.skippedSchedule,
+      ];
     }
 
     this.log.info(
-      `${fixedSchedules.length} fixed schedule generated, ${newSchedulesCount} new schedules`,
+      `${fixedSchedules.length} fixed schedule generated, ${newSchedulesCount} new schedules and ${skippedSchedule.length} schedules skipped because intersecting date, room and time with other schedule`,
     );
+  }
+
+  async createSchedule(body: ScheduleCreateDTO) {
+    try {
+      const room = new Room();
+      room.id = body.roomId;
+
+      const doctor = new Doctor();
+      doctor.id = body.doctorId;
+
+      const schedule = this.scheduleRepository.create({
+        capacity: body.capacity,
+        date: dayjs(body.date).toDate(),
+        doctor,
+        endTime: body.endTime,
+        room,
+        startTime: body.startTime,
+        type: 'special',
+        status: 'ready',
+      });
+
+      await this.scheduleRepository.save(schedule);
+
+      return schedule;
+    } catch (e) {
+      if (e instanceof QueryFailedError) {
+        if ((e as any).code === '23505') {
+          throw new ResponseError(
+            'Schedule or room or time duplicate',
+            StatusCodes.CONFLICT,
+          );
+        }
+      }
+
+      throw e;
+    }
   }
 }

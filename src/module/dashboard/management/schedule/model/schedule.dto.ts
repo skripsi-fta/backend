@@ -43,3 +43,23 @@ export class FixedScheduleUpdateDTO {
   @IsBoolean()
   isOverrideSchedule: boolean;
 }
+
+export class ScheduleCreateDTO {
+  @IsString()
+  date: string;
+
+  @IsNumber()
+  capacity: number;
+
+  @IsString()
+  startTime: string;
+
+  @IsString()
+  endTime: string;
+
+  @IsNumber()
+  roomId: number;
+
+  @IsNumber()
+  doctorId: number;
+}
