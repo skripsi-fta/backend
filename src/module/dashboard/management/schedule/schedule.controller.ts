@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   DefaultValuePipe,
+  Delete,
   Get,
   Post,
   Put,
@@ -21,6 +22,7 @@ import { Response } from 'express';
 import { ScheduleDay } from 'src/database/entities/fixedschedule.entity';
 import type {
   FixedScheduleCreateDTO,
+  FixedScheduleDeleteDTO,
   FixedScheduleUpdateDTO,
   ScheduleCreateDTO,
 } from './model/schedule.dto';
@@ -150,6 +152,19 @@ export class ScheduleManagementController {
       statusCode: StatusCodes.ACCEPTED,
       message: 'Success - Update Fixed Schedule',
       data,
+    });
+  }
+
+  @Delete('fixed')
+  async deleteFixedSchedule(
+    @Res() res: Response,
+    @Body() body: FixedScheduleDeleteDTO,
+  ) {
+    await this.scheduleService.deleteFixedSchedule(body);
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.ACCEPTED,
+      message: 'Success - Deleted Fixed Schedule',
     });
   }
 }

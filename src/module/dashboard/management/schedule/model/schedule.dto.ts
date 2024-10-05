@@ -44,6 +44,14 @@ export class FixedScheduleUpdateDTO {
   isOverrideSchedule: boolean;
 }
 
+export class FixedScheduleDeleteDTO {
+  @IsNumber()
+  id: number;
+
+  @IsBoolean()
+  deleteSchedule: boolean;
+}
+
 export class ScheduleCreateDTO {
   @IsString()
   date: string;

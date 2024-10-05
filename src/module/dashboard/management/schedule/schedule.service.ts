@@ -17,6 +17,7 @@ import {
 } from 'typeorm';
 import type {
   FixedScheduleCreateDTO,
+  FixedScheduleDeleteDTO,
   FixedScheduleUpdateDTO,
   ScheduleCreateDTO,
 } from './model/schedule.dto';
@@ -482,6 +483,76 @@ export class ScheduleManagementService {
     }
   }
 
+  async deleteFixedSchedule(body: FixedScheduleDeleteDTO) {
+    const fixedSchedule = await this.fixedScheduleRepository.findOne({
+      where: {
+        id: body.id,
+        schedule: {
+          date: MoreThan(dayjs().add(1, 'day').toDate()),
+        },
+      },
+      relations: {
+        schedule: {
+          appointments: true,
+        },
+      },
+    });
+
+    if (!fixedSchedule) {
+      throw new ResponseError(
+        'Fixed Schedule not found',
+        StatusCodes.BAD_REQUEST,
+      );
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.startTransaction();
+
+      if (body.deleteSchedule) {
+        let appointments: Appointment[] = [];
+
+        const schedules = fixedSchedule.schedule.map((d) => {
+          const appointmentTemp = d.appointments.map((da) =>
+            this.appointmentRepository.create({
+              ...da,
+              appointmentStatus: 'cancel',
+            }),
+          );
+
+          appointments = [...appointments, ...appointmentTemp];
+
+          return this.scheduleRepository.create({
+            ...d,
+            status: 'cancelled',
+            fixedSchedule: null,
+          });
+        });
+
+        await queryRunner.manager.save(appointments);
+
+        await queryRunner.manager.save(schedules);
+      } else {
+        const schedules = fixedSchedule.schedule.map((d) =>
+          this.scheduleRepository.create({ ...d, fixedSchedule: null }),
+        );
+
+        await queryRunner.manager.save(schedules);
+      }
+
+      await queryRunner.manager.delete('FixedSchedule', { id: body.id });
+
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+
+      await queryRunner.release();
+
+      throw e;
+    }
+  }
+
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async cronScheduleGenerate() {
     const lastUpdateDaysAgo = dayjs().subtract(3, 'weeks').toDate();
@@ -519,6 +590,20 @@ export class ScheduleManagementService {
 
   async createSchedule(body: ScheduleCreateDTO) {
     try {
+      const isScheduleOverlap = await this.checkScheduleOverlap(
+        dayjs(body.date, 'YYYY-MM-DD').toDate(),
+        body.startTime,
+        body.endTime,
+        body.roomId,
+      );
+
+      if (isScheduleOverlap) {
+        throw new ResponseError(
+          'Ruangan sudah terisi pada tanggal dan jam tersebut',
+          StatusCodes.CONFLICT,
+        );
+      }
+
       const room = new Room();
       room.id = body.roomId;
 
@@ -527,7 +612,7 @@ export class ScheduleManagementService {
 
       const schedule = this.scheduleRepository.create({
         capacity: body.capacity,
-        date: dayjs(body.date).toDate(),
+        date: dayjs(body.date, 'YYYY-MM-DD').toDate(),
         doctor,
         endTime: body.endTime,
         room,

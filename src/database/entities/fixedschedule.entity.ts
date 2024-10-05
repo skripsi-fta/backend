@@ -64,5 +64,5 @@ export class FixedSchedule {
   room: Room;
 
   @OneToMany(() => Schedule, (schedule) => schedule.id)
-  schedule: Schedule;
+  schedule: Schedule[];
 }
