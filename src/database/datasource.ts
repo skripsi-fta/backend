@@ -16,6 +16,7 @@ import { Doctor } from './entities/doctor.entity';
 import { Specialization } from './entities/specialization.entity';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { FixedSchedule } from './entities/fixedschedule.entity';
+import { ScheduleTemp } from './entities/scheduletemp.entity';
 
 const dataSource = (configService: ConfigService) => ({
   ...configService.get<TypeOrmModuleOptions>('db'),
@@ -36,6 +37,7 @@ const dataSource = (configService: ConfigService) => ({
     Staff,
     Specialization,
     FixedSchedule,
+    ScheduleTemp,
   ],
   subscribers: [],
   migrations: [],

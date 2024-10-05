@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Auth } from './auth.entitity';
 import { MedicalRecord } from './medicalrecord.entity';
+import { Appointment } from './appointment.entitity';
 
 export enum IdType {
   PASSPORT = 'PASSPORT',
@@ -85,4 +86,7 @@ export class Patient {
     nullable: true,
   })
   medicalRecords: MedicalRecord[];
+
+  @OneToMany(() => Appointment, (appointment) => appointment.id)
+  appointment: Appointment[];
 }

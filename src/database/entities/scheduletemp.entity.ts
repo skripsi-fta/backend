@@ -2,22 +2,15 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  Index,
-  JoinColumn,
   ManyToOne,
-  OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Appointment } from './appointment.entitity';
 import { Room } from './room.entity';
 import { Doctor } from './doctor.entity';
-import { FixedSchedule } from './fixedschedule.entity';
 
 @Entity()
-@Index(['date', 'startTime', 'endTime', 'room'], { unique: true })
-export class Schedule {
+export class ScheduleTemp {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -35,18 +28,11 @@ export class Schedule {
   })
   status: string;
 
-  @OneToOne(() => Schedule, { nullable: true })
-  @JoinColumn()
-  movedTo: number;
-
-  @Column({ type: 'time' })
+  @Column()
   startTime: string;
 
-  @Column({ type: 'time' })
+  @Column()
   endTime: string;
-
-  @Column({ type: 'enum', enum: ['special', 'regular'] })
-  type: string;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -61,12 +47,4 @@ export class Schedule {
 
   @ManyToOne(() => Doctor, (doctor) => doctor.id)
   doctor: Doctor;
-
-  @OneToMany(() => Appointment, (appointment) => appointment.schedule)
-  appointments: Appointment[];
-
-  @ManyToOne(() => FixedSchedule, (FixedSchedule) => FixedSchedule.id, {
-    nullable: true,
-  })
-  fixedSchedule: FixedSchedule;
 }

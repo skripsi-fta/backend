@@ -7,6 +7,7 @@ import { DoctorModule } from './management/doctor/doctor.module';
 import { RoomModule } from './management/room/room.module';
 import { PatientModule } from './management/patient/patient.module';
 import { SpecializationModule } from './management/specialization/specialization.module';
+import { ScheduleManagementModule } from './management/schedule/schedule.module';
 
 @Module({
   imports: [
@@ -40,6 +41,10 @@ import { SpecializationModule } from './management/specialization/specialization
           {
             path: 'specialization',
             module: SpecializationModule,
+          },
+          {
+            path: 'schedule',
+            module: ScheduleManagementModule,
           },
         ],
       },

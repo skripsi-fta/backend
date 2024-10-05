@@ -16,6 +16,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dataSource from './database/datasource';
 import { DashboardModule } from './module/dashboard/dashboard.module';
 import { LoggerMiddleware } from './middleware/logger.middleware';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
     HealthcheckModule,
     LoggerModule,
     DashboardModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [Logger],
