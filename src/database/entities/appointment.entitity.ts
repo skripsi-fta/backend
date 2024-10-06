@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -88,21 +89,25 @@ export class Appointment {
   @OneToOne(() => MedicalRecord, (medicalRecord) => medicalRecord.id, {
     nullable: true,
   })
+  @JoinColumn()
   medicalRecord: MedicalRecord;
 
   @OneToOne(() => DoctorQueue, (doctorQueue) => doctorQueue.id, {
     nullable: true,
   })
+  @JoinColumn()
   doctorQueue: DoctorQueue;
 
   @OneToOne(() => PharmacyQueue, (pharmacyQueue) => pharmacyQueue.id, {
     nullable: true,
   })
+  @JoinColumn()
   pharmacyQueue: PharmacyQueue;
 
   @OneToOne(() => CashierQueue, (cashierQueue) => cashierQueue.id, {
     nullable: true,
   })
+  @JoinColumn()
   cashierQueue: CashierQueue;
 
   @ManyToOne(() => Schedule, (schedule) => schedule.id)
