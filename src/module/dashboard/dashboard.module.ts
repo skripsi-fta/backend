@@ -8,6 +8,7 @@ import { RoomModule } from './management/room/room.module';
 import { PatientModule } from './management/patient/patient.module';
 import { SpecializationModule } from './management/specialization/specialization.module';
 import { ScheduleManagementModule } from './management/schedule/schedule.module';
+import { MedicalrecordModule } from './management/medicalrecord/medicalrecord.module';
 
 @Module({
   imports: [
@@ -45,6 +46,10 @@ import { ScheduleManagementModule } from './management/schedule/schedule.module'
           {
             path: 'schedule',
             module: ScheduleManagementModule,
+          },
+          {
+            path: 'medicalrecord',
+            module: MedicalrecordModule,
           },
         ],
       },

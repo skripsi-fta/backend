@@ -5,6 +5,7 @@ import { RoomModule } from './room/room.module';
 import { PatientModule } from './patient/patient.module';
 import { SpecializationModule } from './specialization/specialization.module';
 import { ScheduleManagementModule } from './schedule/schedule.module';
+import { MedicalrecordModule } from './medicalrecord/medicalrecord.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ScheduleManagementModule } from './schedule/schedule.module';
     PatientModule,
     SpecializationModule,
     ScheduleManagementModule,
+    MedicalrecordModule,
   ],
 })
 export class ManagementModule {}
