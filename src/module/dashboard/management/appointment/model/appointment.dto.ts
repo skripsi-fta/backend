@@ -6,9 +6,6 @@ export class AppointmentPostDTO {
 
   @IsNumber()
   scheduleId: number;
-
-  @IsNumber()
-  medicalRecordId: number;
 }
 
 export class AppointmentPutDTO {
