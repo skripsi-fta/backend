@@ -24,8 +24,8 @@ import {
 } from './model/medicalrecord.dto';
 
 @Controller('')
-// @Roles(StaffRole.MANAGEMENT)
-// @UseGuards(JwtAuthGuard, RoleGuard)
+@Roles(StaffRole.MANAGEMENT)
+@UseGuards(JwtAuthGuard, RoleGuard)
 export class MedicalrecordController {
   constructor(private medicalrecordService: MedicalrecordService) {}
 
