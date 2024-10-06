@@ -4,25 +4,19 @@ import {
   DefaultValuePipe,
   Get,
   Post,
+  Put,
   Query,
   Res,
 } from '@nestjs/common';
 import { AppointmentService } from './appointment.service';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Appointment } from 'src/database/entities/appointment.entitity';
-import { Repository } from 'typeorm';
-import { AppointmentPostDTO } from './model/appointment.dto';
+import { AppointmentPostDTO, AppointmentPutDTO } from './model/appointment.dto';
 import { sendResponse } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import { Response } from 'express';
 
 @Controller('')
 export class AppointmentController {
-  constructor(
-    private appointmentService: AppointmentService,
-    @InjectRepository(Appointment)
-    private appointmentRepository: Repository<Appointment>,
-  ) {}
+  constructor(private appointmentService: AppointmentService) {}
 
   @Get()
   async getAppointment(
@@ -53,22 +47,39 @@ export class AppointmentController {
 
   @Post()
   async addAppointment(@Res() res: Response, @Body() req: AppointmentPostDTO) {
-    // const appointmentExist = await this.appointmentRepository.findOne({
-    //   where: [{ bookingCode: req.bookingCode }],
-    // });
-
-    // if (appointmentExist) {
-    //   return sendResponse(res, {
-    //     statusCode: StatusCodes.CONFLICT,
-    //     message: 'Error - Appointment already exist',
-    //   });
-    // }
-
     const data = await this.appointmentService.addAppointment(req);
 
     return sendResponse(res, {
       statusCode: StatusCodes.OK,
       message: 'Success - Add Appointment',
+      data: data,
+    });
+  }
+
+  @Put()
+  async updateAppointment(
+    @Res() res: Response,
+    @Body() req: AppointmentPutDTO,
+  ) {
+    const data = await this.appointmentService.updateAppointment(req);
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      message: 'Success - Update Appointment',
+      data: data,
+    });
+  }
+
+  @Post('checkin')
+  async checkInAppointment(@Res() res: Response, @Body() req: { id: number }) {
+    const data = await this.appointmentService.updateAppointmentStatus(
+      req.id,
+      'checkin',
+    );
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      message: 'Success - Check In Appointment',
       data: data,
     });
   }
