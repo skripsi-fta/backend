@@ -52,7 +52,6 @@ export class AppointmentService {
   }
 
   async addAppointment(req: AppointmentPostDTO) {
-    this.log.info('req: ' + JSON.stringify(req));
     const patientExist = await this.patientRepository.findOne({
       where: [{ id: req.patientId }],
     });
@@ -69,27 +68,25 @@ export class AppointmentService {
       throw new ResponseError('Schedule not found', StatusCodes.CONFLICT);
     }
 
-    // cek capacity dari schedule (?)
+    const appointmentExist = await this.appointmentRepository.findOne({
+      where: {
+        patient: { id: req.patientId },
+        schedule: { id: req.scheduleId },
+      },
+    });
+
+    // validation to check patient on that schedule already registered
+    if (appointmentExist) {
+      throw new ResponseError(
+        'Patient already registered on this schedule',
+        StatusCodes.CONFLICT,
+      );
+    }
+
+    // capacity check(?)
     if (scheduleExist.capacity <= 0 || scheduleExist.status !== 'ready') {
       throw new ResponseError('Schedule not available', StatusCodes.CONFLICT);
     }
-
-    // waktu daftar medical record langsung isi atau nanti?
-    // const medicalRecordExist = await this.medicalRepository.findOne({
-    //   relations: {
-    //     patient: true,
-    //   },
-    //   where: { id: req.medicalRecordId },
-    // });
-
-    // this.log.info('medicalRecordExist: ' + JSON.stringify(medicalRecordExist));
-
-    // if (
-    //   !medicalRecordExist ||
-    //   medicalRecordExist.patient.id !== req.patientId
-    // ) {
-    //   throw new ResponseError('Medical Record not found', StatusCodes.CONFLICT);
-    // }
 
     const bookingCode = this.generateBookingCode();
 
@@ -104,7 +101,6 @@ export class AppointmentService {
       bookingQr: bookingQr,
       patient: patientExist,
       schedule: scheduleExist,
-      // medicalRecord: medicalRecordExist,
     });
 
     const result = await this.appointmentRepository.save(appointment);
@@ -115,6 +111,7 @@ export class AppointmentService {
 
   async updateAppointment(req: AppointmentPutDTO) {
     const appointment = await this.appointmentRepository.findOne({
+      relations: ['patient', 'schedule', 'medicalRecord'],
       where: { id: req.id },
     });
 
@@ -122,12 +119,11 @@ export class AppointmentService {
       throw new ResponseError('Appointment not found', StatusCodes.NOT_FOUND);
     }
 
-    const patientExist = await this.patientRepository.findOne({
-      where: [{ id: req.patientId }],
-    });
-
-    if (!patientExist) {
-      throw new ResponseError('Patient not found', StatusCodes.CONFLICT);
+    if (appointment.appointmentStatus !== 'scheduled') {
+      throw new ResponseError(
+        'Appointment cannot be updated',
+        StatusCodes.CONFLICT,
+      );
     }
 
     const scheduleExist = await this.scheduleRepository.findOne({
@@ -136,6 +132,10 @@ export class AppointmentService {
 
     if (!scheduleExist) {
       throw new ResponseError('Schedule not found', StatusCodes.CONFLICT);
+    }
+
+    if (scheduleExist.capacity <= 0 || scheduleExist.status !== 'ready') {
+      throw new ResponseError('Schedule not available', StatusCodes.CONFLICT);
     }
 
     const medicalRecordExist = await this.medicalRepository.findOne({
@@ -147,12 +147,11 @@ export class AppointmentService {
 
     if (
       !medicalRecordExist ||
-      medicalRecordExist.patient.id !== req.patientId
+      medicalRecordExist.patient.id !== appointment.patient.id
     ) {
       throw new ResponseError('Medical Record not found', StatusCodes.CONFLICT);
     }
 
-    appointment.patient = patientExist;
     appointment.schedule = scheduleExist;
     appointment.medicalRecord = medicalRecordExist;
 

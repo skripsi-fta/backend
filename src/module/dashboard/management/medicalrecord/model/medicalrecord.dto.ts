@@ -2,6 +2,9 @@ import { IsNumber, IsNumberString, IsString } from 'class-validator';
 
 export class MedicalRecordPostDTO {
   @IsNumber()
+  appointmentId: number;
+
+  @IsNumber()
   patientId: number;
 
   @IsNumberString()

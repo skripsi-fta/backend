@@ -10,6 +10,7 @@ import {
 import { Patient } from 'src/database/entities/patient.entity';
 import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
+import { Appointment } from 'src/database/entities/appointment.entitity';
 
 @Injectable()
 export class MedicalrecordService {
@@ -19,6 +20,8 @@ export class MedicalrecordService {
     private readonly medicalRecordRepository: Repository<MedicalRecord>,
     @InjectRepository(Patient)
     private readonly patientRepository: Repository<Patient>,
+    @InjectRepository(Appointment)
+    private readonly appointmentRepository: Repository<Appointment>,
   ) {}
 
   async getMedicalRecord(
@@ -57,12 +60,57 @@ export class MedicalrecordService {
       throw new ResponseError('Patient not found', StatusCodes.CONFLICT);
     }
 
+    const appointmentExist = await this.appointmentRepository.findOne({
+      relations: ['patient', 'medicalRecord'],
+      where: [{ id: req.appointmentId }],
+    });
+
+    if (!appointmentExist) {
+      throw new ResponseError('Appointment not found', StatusCodes.CONFLICT);
+    }
+
+    // validation to check patient id on appointment and req are same
+    if (appointmentExist.patient.id !== req.patientId) {
+      throw new ResponseError(
+        'Patient not schedule in this appointment',
+        StatusCodes.CONFLICT,
+      );
+    }
+
+    // validation to check medical record already add to this appointment
+    if (appointmentExist.medicalRecord) {
+      throw new ResponseError(
+        'Medical Record already exist in this appointment',
+        StatusCodes.CONFLICT,
+      );
+    }
+
+    // validation to check appointment is check in
+    if (appointmentExist.isCheckIn === false) {
+      throw new ResponseError(
+        'Appointment is not checked in, please check in first',
+        StatusCodes.CONFLICT,
+      );
+    }
+
+    // validation to check appointment status is check in
+    if (appointmentExist.appointmentStatus !== 'checkin') {
+      throw new ResponseError(
+        'Appointment is not in check in status',
+        StatusCodes.CONFLICT,
+      );
+    }
+
     const medicalRecord = this.medicalRecordRepository.create({
       ...req,
       patient: patientExist,
     });
 
     const result = await this.medicalRecordRepository.save(medicalRecord);
+
+    appointmentExist.medicalRecord = result;
+
+    await this.appointmentRepository.save(appointmentExist);
 
     return {
       id: result.id,

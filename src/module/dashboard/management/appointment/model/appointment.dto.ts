@@ -13,9 +13,6 @@ export class AppointmentPutDTO {
   id: number;
 
   @IsNumber()
-  patientId: number;
-
-  @IsNumber()
   scheduleId: number;
 
   @IsNumber()
