@@ -15,6 +15,16 @@ import { CashierQueue } from './cashierqueue.entity';
 import { Schedule } from './schedule.entity';
 import { Patient } from './patient.entity';
 
+export enum AppointmentStatus {
+  SCHEDULED = 'scheduled',
+  CHECKIN = 'checkin',
+  DOCTORQUEUE = 'doctor queue',
+  PHARMACYQUEUE = 'pharmacy queue',
+  CASHIERQUEUE = 'cashier queue',
+  DONE = 'done',
+  CANCEL = 'cancel',
+}
+
 @Entity()
 export class Appointment {
   @PrimaryGeneratedColumn()
@@ -28,16 +38,8 @@ export class Appointment {
 
   @Column({
     type: 'enum',
-    enum: [
-      'scheduled',
-      'checkin',
-      'doctor queue',
-      'pharmacy queue',
-      'cashier queue',
-      'done',
-      'cancel',
-    ],
-    default: 'scheduled',
+    enum: AppointmentStatus,
+    default: AppointmentStatus.SCHEDULED,
   })
   appointmentStatus: string;
 

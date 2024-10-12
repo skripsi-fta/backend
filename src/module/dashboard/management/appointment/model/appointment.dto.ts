@@ -1,4 +1,4 @@
-import { IsNumber } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 
 export class AppointmentPostDTO {
   @IsNumber()
@@ -17,4 +17,9 @@ export class AppointmentPutDTO {
 
   @IsNumber()
   medicalRecordId: number;
+}
+
+export class AppointmentCheckInDTO {
+  @IsString()
+  bookingCode: string;
 }

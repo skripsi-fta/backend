@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Appointment } from 'src/database/entities/appointment.entitity';
+import {
+  Appointment,
+  AppointmentStatus,
+} from 'src/database/entities/appointment.entitity';
 import { LoggerService } from 'src/module/logger/logger.service';
 import { Repository } from 'typeorm';
 import { AppointmentPostDTO, AppointmentPutDTO } from './model/appointment.dto';
@@ -161,25 +164,39 @@ export class AppointmentService {
     };
   }
 
-  async updateAppointmentStatus(id: number, status: string) {
+  async updateAppointmentStatus(bookingCode: string, status: string) {
+    if (!bookingCode) {
+      throw new ResponseError(
+        'Booking code is required',
+        StatusCodes.BAD_REQUEST,
+      );
+    }
+
     const appointment = await this.appointmentRepository.findOne({
-      where: { id: id },
+      where: { bookingCode: bookingCode },
     });
 
     if (!appointment) {
       throw new ResponseError('Appointment not found', StatusCodes.NOT_FOUND);
     }
 
-    appointment.appointmentStatus = status;
+    if (appointment.appointmentStatus === status) {
+      throw new ResponseError(
+        'Appointment already ' + status,
+        StatusCodes.CONFLICT,
+      );
+    }
 
-    if (status === 'checkin') {
+    if (status === AppointmentStatus.CHECKIN) {
       appointment.isCheckIn = true;
       appointment.checkInTime = new Date();
     }
 
-    if (status === 'done') {
+    if (status === AppointmentStatus.DONE) {
       appointment.finishTime = new Date();
     }
+
+    appointment.appointmentStatus = status;
 
     const result = await this.appointmentRepository.save(appointment);
     return {

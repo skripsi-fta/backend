@@ -13,6 +13,7 @@ import { AppointmentPostDTO, AppointmentPutDTO } from './model/appointment.dto';
 import { sendResponse } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import { Response } from 'express';
+import { AppointmentStatus } from 'src/database/entities/appointment.entitity';
 
 @Controller('')
 export class AppointmentController {
@@ -71,10 +72,14 @@ export class AppointmentController {
   }
 
   @Post('checkin')
-  async checkInAppointment(@Res() res: Response, @Body() req: { id: number }) {
+  async checkInAppointment(
+    @Res() res: Response,
+    @Body() req: { bookingCode: string },
+  ) {
+    console.log(req.bookingCode);
     const data = await this.appointmentService.updateAppointmentStatus(
-      req.id,
-      'checkin',
+      req.bookingCode,
+      AppointmentStatus.CHECKIN,
     );
 
     return sendResponse(res, {
