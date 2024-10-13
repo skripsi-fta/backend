@@ -4,6 +4,8 @@ import { RoomModule } from './room/room.module';
 import { PatientModule } from './patient/patient.module';
 import { SpecializationModule } from './specialization/specialization.module';
 import { ScheduleManagementModule } from './schedule/schedule.module';
+import { MedicalrecordModule } from './medicalrecord/medicalrecord.module';
+import { AppointmentModule } from './appointment/appointment.module';
 import { DoctorManagementModule } from './doctor/doctor.module';
 
 @Module({
@@ -14,6 +16,8 @@ import { DoctorManagementModule } from './doctor/doctor.module';
     PatientModule,
     SpecializationModule,
     ScheduleManagementModule,
+    MedicalrecordModule,
+    AppointmentModule,
   ],
 })
 export class ManagementModule {}
