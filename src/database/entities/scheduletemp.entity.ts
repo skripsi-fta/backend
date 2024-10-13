@@ -42,6 +42,9 @@ export class ScheduleTemp {
   })
   updatedAt: Date;
 
+  @Column()
+  notes: string;
+
   @ManyToOne(() => Room, (room) => room.id)
   room: Room;
 

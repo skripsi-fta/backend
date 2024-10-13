@@ -11,4 +11,4 @@ import { LoggerModule } from 'src/module/logger/logger.module';
   controllers: [DoctorController],
   providers: [DoctorService],
 })
-export class DoctorModule {}
+export class DoctorManagementModule {}

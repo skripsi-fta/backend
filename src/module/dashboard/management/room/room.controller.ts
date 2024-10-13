@@ -22,7 +22,7 @@ import { Roles } from 'src/decorator/role.decorator';
 import { StaffRole } from 'src/database/entities/staff.entity';
 
 @Controller('')
-@Roles(StaffRole.MANAGEMENT)
+@Roles(StaffRole.MANAGEMENT, StaffRole.DOCTOR)
 @UseGuards(JwtAuthGuard, RoleGuard)
 export class RoomController {
   constructor(

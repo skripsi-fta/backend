@@ -20,10 +20,17 @@ export class AuthService {
   ) {}
 
   async validateUser(req: AuthDTO) {
-    const findUser = await this.staffRepository.findOneBy({
-      ...(req.username.includes('@')
-        ? { email: req.username }
-        : { username: req.username }),
+    const findUser = await this.staffRepository.findOne({
+      where: {
+        ...(req.username.includes('@')
+          ? { email: req.username }
+          : { username: req.username }),
+      },
+      relations: {
+        doctor: {
+          specialization: true,
+        },
+      },
     });
 
     if (!findUser) {
