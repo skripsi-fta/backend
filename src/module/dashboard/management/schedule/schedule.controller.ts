@@ -28,7 +28,7 @@ import type {
 } from './model/schedule.dto';
 
 @Controller('')
-@Roles(StaffRole.MANAGEMENT)
+@Roles(StaffRole.MANAGEMENT, StaffRole.DOCTOR)
 @UseGuards(JwtAuthGuard, RoleGuard)
 export class ScheduleManagementController {
   constructor(
