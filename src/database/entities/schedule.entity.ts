@@ -14,6 +14,7 @@ import { Appointment } from './appointment.entitity';
 import { Room } from './room.entity';
 import { Doctor } from './doctor.entity';
 import { FixedSchedule } from './fixedschedule.entity';
+import { ScheduleTemp } from './scheduletemp.entity';
 
 @Entity()
 @Index(['date', 'startTime', 'endTime', 'room'], { unique: true })
@@ -69,4 +70,7 @@ export class Schedule {
     nullable: true,
   })
   fixedSchedule: FixedSchedule;
+
+  @OneToMany(() => ScheduleTemp, (ScheduleTemp) => ScheduleTemp.id)
+  scheduleTemp: ScheduleTemp[];
 }

@@ -29,6 +29,7 @@ import * as dayjs from 'dayjs';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { findDateInSameWeek } from 'src/utils/date.utils';
 import { Appointment } from 'src/database/entities/appointment.entitity';
+import { ScheduleTemp } from 'src/database/entities/scheduletemp.entity';
 
 @Injectable()
 export class ScheduleManagementService {
@@ -41,6 +42,8 @@ export class ScheduleManagementService {
     @InjectRepository(Appointment)
     private readonly appointmentRepository: Repository<Appointment>,
     private readonly dataSource: DataSource,
+    @InjectRepository(ScheduleTemp)
+    private readonly scheduleTempRepository: Repository<ScheduleTemp>,
   ) {}
 
   async checkScheduleOverlap(
@@ -128,7 +131,7 @@ export class ScheduleManagementService {
       skip: (pageNumber - 1) * pageSize,
       take: pageSize,
       order: {
-        id: 'ASC',
+        date: 'ASC',
       },
       where: {
         doctor: doctorId ? { id: doctorId } : undefined,
@@ -140,11 +143,122 @@ export class ScheduleManagementService {
 
     return {
       totalRows: count,
-      list: data.map((d) => ({
-        ...d,
-        startTime: d.startTime.substring(0, 5),
-        endTime: d.endTime.substring(0, 5),
-      })),
+      list: data.map((d) => {
+        const startDate = dayjs(`${d.date} ${d.startTime}`);
+
+        const endDate = dayjs(`${d.date} ${d.endTime}`);
+
+        const dateNow = dayjs();
+
+        let status = d.status;
+
+        if (d.status === 'ready') {
+          if (dateNow.isBefore(endDate) && dateNow.isAfter(startDate)) {
+            status = 'berjalan';
+          }
+          if (dateNow.isAfter(endDate)) {
+            status = 'completed';
+          }
+        }
+
+        return {
+          ...d,
+          startTime: d.startTime.substring(0, 5),
+          endTime: d.endTime.substring(0, 5),
+          status,
+        };
+      }),
+    };
+  }
+
+  async getScheduleById(id: number) {
+    const data = await this.scheduleRepository.findOne({
+      where: {
+        id,
+      },
+      relations: {
+        doctor: {
+          specialization: true,
+        },
+        room: true,
+        appointments: {
+          patient: true,
+        },
+      },
+    });
+
+    let proposedSchedule = null;
+
+    if (data.status !== 'ready') {
+      let where: FindOptionsWhere<ScheduleTemp> = {};
+
+      if (data.status === 'changed' && data.movedTo) {
+        proposedSchedule = await this.scheduleRepository.findOne({
+          where: {
+            id: data.movedTo,
+          },
+          relations: {
+            doctor: {
+              specialization: true,
+            },
+            room: true,
+            appointments: {
+              patient: true,
+            },
+          },
+        });
+      } else {
+        where = {
+          ...where,
+          oldSchedule: {
+            id,
+          },
+          status: data.status === 'in review' ? 'waiting' : undefined,
+        };
+
+        console.log(where);
+        console.log(data.status);
+
+        proposedSchedule = await this.scheduleTempRepository.findOne({
+          where,
+          relations: {
+            oldSchedule: {
+              doctor: {
+                specialization: true,
+              },
+              room: true,
+              appointments: {
+                patient: true,
+              },
+            },
+          },
+          order: {
+            id: 'DESC',
+          },
+        });
+      }
+    }
+
+    const startDate = dayjs(`${data.date} ${data.startTime}`);
+
+    const endDate = dayjs(`${data.date} ${data.endTime}`);
+
+    const dateNow = dayjs();
+
+    let status = data.status;
+
+    if (data.status === 'ready') {
+      if (dateNow.isBefore(endDate) && dateNow.isAfter(startDate)) {
+        status = 'berjalan';
+      }
+      if (dateNow.isAfter(endDate)) {
+        status = 'completed';
+      }
+    }
+
+    return {
+      schedule: { ...data, status },
+      proposedSchedule: proposedSchedule || null,
     };
   }
 
@@ -441,7 +555,7 @@ export class ScheduleManagementService {
           );
 
           oldSchedule.movedTo = newSchedule.id;
-          oldSchedule.status = 'cancelled';
+          oldSchedule.status = 'changed';
 
           const oldAppointments = oldSchedule.appointments.map((d) =>
             this.appointmentRepository.create({
