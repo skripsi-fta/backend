@@ -4,6 +4,7 @@ import {
   DefaultValuePipe,
   Delete,
   Get,
+  Param,
   Post,
   Put,
   Query,
@@ -165,6 +166,17 @@ export class ScheduleManagementController {
     return sendResponse(res, {
       statusCode: StatusCodes.ACCEPTED,
       message: 'Success - Deleted Fixed Schedule',
+    });
+  }
+
+  @Get(':id')
+  async getScheduleById(@Res() res: Response, @Param('id') id: number) {
+    const data = await this.scheduleService.getScheduleById(id);
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      message: 'Success - GET Fixed Schedule',
+      data,
     });
   }
 }

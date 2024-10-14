@@ -8,6 +8,8 @@ import { Room } from 'src/database/entities/room.entity';
 import { Appointment } from 'src/database/entities/appointment.entitity';
 import { ScheduleDoctorController } from './schedule.controller';
 import { ScheduleDoctorService } from './schedule.service';
+import { ScheduleTemp } from 'src/database/entities/scheduletemp.entity';
+import { ScheduleManagementModule } from '../../management/schedule/schedule.module';
 
 @Module({
   imports: [
@@ -18,7 +20,9 @@ import { ScheduleDoctorService } from './schedule.service';
       FixedSchedule,
       Room,
       Appointment,
+      ScheduleTemp,
     ]),
+    ScheduleManagementModule,
   ],
   controllers: [ScheduleDoctorController],
   providers: [ScheduleDoctorService],

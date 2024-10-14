@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Room } from './room.entity';
 import { Doctor } from './doctor.entity';
+import { Schedule } from './schedule.entity';
 
 @Entity()
 export class ScheduleTemp {
@@ -24,7 +25,7 @@ export class ScheduleTemp {
 
   @Column({
     type: 'enum',
-    enum: ['ready', 'in review', 'cancelled', 'changed'],
+    enum: ['waiting', 'approved', 'cancelled'],
   })
   status: string;
 
@@ -45,9 +46,15 @@ export class ScheduleTemp {
   @Column()
   notes: string;
 
-  @ManyToOne(() => Room, (room) => room.id)
+  @Column({ nullable: true })
+  notesAdmin: string;
+
+  @ManyToOne(() => Room, (room) => room.id, { nullable: true })
   room: Room;
 
   @ManyToOne(() => Doctor, (doctor) => doctor.id)
   doctor: Doctor;
+
+  @ManyToOne(() => Schedule, (schedule) => schedule.id)
+  oldSchedule: Schedule;
 }
