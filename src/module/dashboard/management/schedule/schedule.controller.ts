@@ -25,6 +25,8 @@ import type {
   FixedScheduleCreateDTO,
   FixedScheduleDeleteDTO,
   FixedScheduleUpdateDTO,
+  ScheduleApprovalDTO,
+  ScheduleChangeDTO,
   ScheduleCreateDTO,
 } from './model/schedule.dto';
 
@@ -166,6 +168,29 @@ export class ScheduleManagementController {
     return sendResponse(res, {
       statusCode: StatusCodes.ACCEPTED,
       message: 'Success - Deleted Fixed Schedule',
+    });
+  }
+
+  @Put('')
+  async changeSchedule(@Res() res: Response, @Body() body: ScheduleChangeDTO) {
+    await this.scheduleService.changeSchedule(body);
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.ACCEPTED,
+      message: 'Success - Schedule Changed',
+    });
+  }
+
+  @Put('approval')
+  async approvalSchedule(
+    @Res() res: Response,
+    @Body() body: ScheduleApprovalDTO,
+  ) {
+    await this.scheduleService.approvalSchedule(body);
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.ACCEPTED,
+      message: 'Success - Schedule Approval',
     });
   }
 

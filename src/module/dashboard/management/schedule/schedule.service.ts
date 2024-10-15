@@ -19,6 +19,8 @@ import type {
   FixedScheduleCreateDTO,
   FixedScheduleDeleteDTO,
   FixedScheduleUpdateDTO,
+  ScheduleApprovalDTO,
+  ScheduleChangeDTO,
   ScheduleCreateDTO,
 } from './model/schedule.dto';
 import { ResponseError } from 'src/utils/api.utils';
@@ -58,6 +60,7 @@ export class ScheduleManagementService {
         room: { id: roomId },
         startTime: LessThan(endTime),
         endTime: MoreThan(startTime),
+        status: 'ready',
       },
     });
 
@@ -184,6 +187,7 @@ export class ScheduleManagementService {
         appointments: {
           patient: true,
         },
+        movedTo: true,
       },
     });
 
@@ -195,7 +199,7 @@ export class ScheduleManagementService {
       if (data.status === 'changed' && data.movedTo) {
         proposedSchedule = await this.scheduleRepository.findOne({
           where: {
-            id: data.movedTo,
+            id: data.movedTo.id,
           },
           relations: {
             doctor: {
@@ -215,9 +219,6 @@ export class ScheduleManagementService {
           },
           status: data.status === 'in review' ? 'waiting' : undefined,
         };
-
-        console.log(where);
-        console.log(data.status);
 
         proposedSchedule = await this.scheduleTempRepository.findOne({
           where,
@@ -488,6 +489,11 @@ export class ScheduleManagementService {
           },
           fixedSchedule: true,
         },
+        order: {
+          appointments: {
+            id: 'ASC',
+          },
+        },
       });
 
       const queryRunner = this.dataSource.createQueryRunner();
@@ -532,8 +538,14 @@ export class ScheduleManagementService {
             continue;
           }
 
-          const newAppointments = oldSchedule.appointments.map((d) => {
-            return this.appointmentRepository.create({ ...d, id: undefined });
+          const capacity = fixedSchedule.capacity;
+
+          const newAppointments = oldSchedule.appointments.map((d, i) => {
+            return this.appointmentRepository.create({
+              ...d,
+              appointmentStatus: i + 1 <= capacity ? 'scheduled' : 'cancel',
+              id: undefined,
+            });
           });
 
           const newAppointmensSaved =
@@ -542,7 +554,9 @@ export class ScheduleManagementService {
           const newSchedule = await queryRunner.manager.save(
             this.scheduleRepository.create({
               capacity: fixedSchedule.capacity,
-              appointments: newAppointmensSaved,
+              appointments: newAppointmensSaved.filter(
+                (d) => d.appointmentStatus === 'scheduled',
+              ),
               date: changedToDate.toDate(),
               doctor: fixedSchedule.doctor,
               endTime: fixedSchedule.endTime,
@@ -554,7 +568,10 @@ export class ScheduleManagementService {
             }),
           );
 
-          oldSchedule.movedTo = newSchedule.id;
+          const movedToSchedule = new Schedule();
+          movedToSchedule.id = newSchedule.id;
+
+          oldSchedule.movedTo = movedToSchedule;
           oldSchedule.status = 'changed';
 
           const oldAppointments = oldSchedule.appointments.map((d) =>
@@ -738,6 +755,282 @@ export class ScheduleManagementService {
       await this.scheduleRepository.save(schedule);
 
       return schedule;
+    } catch (e) {
+      if (e instanceof QueryFailedError) {
+        if ((e as any).code === '23505') {
+          throw new ResponseError(
+            'Schedule or room or time duplicate',
+            StatusCodes.CONFLICT,
+          );
+        }
+      }
+
+      throw e;
+    }
+  }
+
+  async changeSchedule(body: ScheduleChangeDTO) {
+    try {
+      const isScheduleOverlap = await this.checkScheduleOverlap(
+        dayjs(body.date, 'YYYY-MM-DD').toDate(),
+        body.startTime,
+        body.endTime,
+        body.roomId,
+      );
+
+      if (isScheduleOverlap) {
+        throw new ResponseError(
+          'Ruangan sudah terisi pada tanggal dan jam tersebut',
+          StatusCodes.CONFLICT,
+        );
+      }
+
+      const oldSchedule = await this.scheduleRepository.findOne({
+        where: {
+          id: body.id,
+        },
+        relations: {
+          doctor: {
+            specialization: true,
+          },
+          room: true,
+          appointments: {
+            patient: true,
+          },
+        },
+        order: {
+          appointments: {
+            id: 'ASC',
+          },
+        },
+      });
+
+      if (!oldSchedule) {
+        throw new ResponseError('Schedule not found', StatusCodes.NOT_FOUND);
+      }
+
+      const queryRunner = this.dataSource.createQueryRunner();
+
+      try {
+        const capacity = oldSchedule.capacity;
+
+        const newAppointments = oldSchedule.appointments.map((d, i) => {
+          return this.appointmentRepository.create({
+            ...d,
+            appointmentStatus: i + 1 <= capacity ? 'scheduled' : 'cancel',
+            id: undefined,
+          });
+        });
+
+        const newAppointmensSaved =
+          await queryRunner.manager.save(newAppointments);
+
+        const newRoom = new Room();
+        newRoom.id = body.roomId;
+
+        const newSchedule = await queryRunner.manager.save(
+          this.scheduleRepository.create({
+            capacity: body.capacity,
+            appointments: newAppointmensSaved.filter(
+              (d) => d.appointmentStatus === 'scheduled',
+            ),
+            date: dayjs(body.date, 'YYYY-MM-DD').toDate(),
+            doctor: oldSchedule.doctor,
+            endTime: body.endTime,
+            fixedSchedule: oldSchedule.fixedSchedule,
+            room: newRoom,
+            startTime: body.startTime,
+            status: 'ready',
+            type: oldSchedule.type,
+          }),
+        );
+
+        const movedScheduleTo = new Schedule();
+        movedScheduleTo.id = newSchedule.id;
+
+        oldSchedule.movedTo = movedScheduleTo;
+        oldSchedule.status = 'changed';
+
+        const oldAppointments = oldSchedule.appointments.map((d) =>
+          this.appointmentRepository.create({
+            ...d,
+            appointmentStatus: 'cancel',
+          }),
+        );
+
+        await queryRunner.manager.save(oldAppointments);
+
+        oldSchedule.appointments = oldAppointments;
+
+        await queryRunner.manager.save(oldSchedule);
+
+        await queryRunner.commitTransaction();
+      } catch (e) {
+        await queryRunner.rollbackTransaction();
+
+        await queryRunner.release();
+
+        throw e;
+      }
+
+      return true;
+    } catch (e) {
+      if (e instanceof QueryFailedError) {
+        if ((e as any).code === '23505') {
+          throw new ResponseError(
+            'Schedule or room or time duplicate',
+            StatusCodes.CONFLICT,
+          );
+        }
+      }
+
+      throw e;
+    }
+  }
+
+  async approvalSchedule(body: ScheduleApprovalDTO) {
+    try {
+      const oldSchedule = await this.scheduleRepository.findOne({
+        where: {
+          id: body.id,
+        },
+        relations: {
+          room: true,
+          appointments: true,
+        },
+        order: {
+          appointments: {
+            id: 'ASC',
+          },
+        },
+      });
+
+      if (!oldSchedule) {
+        throw new ResponseError('Schedule not found', StatusCodes.NOT_FOUND);
+      }
+
+      const tempSchedule = await this.scheduleTempRepository.findOne({
+        where: {
+          status: 'waiting',
+          oldSchedule: {
+            id: body.id,
+          },
+        },
+        relations: {
+          doctor: true,
+        },
+        order: {
+          id: 'DESC',
+        },
+      });
+
+      const queryRunner = this.dataSource.createQueryRunner();
+
+      await queryRunner.startTransaction();
+
+      try {
+        if (body.action === 'cancel') {
+          oldSchedule.status = 'cancelled';
+
+          const appointments = oldSchedule.appointments.map((d) =>
+            this.appointmentRepository.create({
+              ...d,
+              appointmentStatus: 'cancel',
+            }),
+          );
+
+          await queryRunner.manager.save(oldSchedule);
+
+          await queryRunner.manager.save(appointments);
+        } else if (body.action === 'reject') {
+          oldSchedule.status = 'ready';
+
+          if (tempSchedule) {
+            tempSchedule.status = 'cancelled';
+            await queryRunner.manager.save(tempSchedule);
+          }
+
+          await queryRunner.manager.save(oldSchedule);
+        } else {
+          const capacity = tempSchedule.capacity;
+
+          const room = new Room();
+          room.id = body.roomId;
+
+          const isScheduleOverlap = await this.checkScheduleOverlap(
+            dayjs(tempSchedule.date, 'YYYY-MM-DD').toDate(),
+            tempSchedule.startTime,
+            tempSchedule.endTime,
+            room.id,
+          );
+
+          if (isScheduleOverlap) {
+            throw new ResponseError(
+              'Ruangan sudah terisi pada tanggal dan jam tersebut',
+              StatusCodes.CONFLICT,
+            );
+          }
+
+          const newAppointments = oldSchedule.appointments.map((d, i) => {
+            return this.appointmentRepository.create({
+              ...d,
+              appointmentStatus: i + 1 <= capacity ? 'scheduled' : 'cancel',
+              id: undefined,
+            });
+          });
+
+          const newAppointmensSaved =
+            await queryRunner.manager.save(newAppointments);
+
+          const newSchedule = await queryRunner.manager.save(
+            this.scheduleRepository.create({
+              capacity: tempSchedule.capacity,
+              appointments: newAppointmensSaved.filter(
+                (d) => d.appointmentStatus === 'scheduled',
+              ),
+              date: dayjs(tempSchedule.date).toDate(),
+              doctor: tempSchedule.doctor,
+              endTime: tempSchedule.endTime,
+              room,
+              startTime: tempSchedule.startTime,
+              status: 'ready',
+              type: 'regular',
+            }),
+          );
+
+          const movedScheduleTo = new Schedule();
+          movedScheduleTo.id = newSchedule.id;
+
+          oldSchedule.movedTo = movedScheduleTo;
+          oldSchedule.status = 'changed';
+
+          const oldAppointments = oldSchedule.appointments.map((d) =>
+            this.appointmentRepository.create({
+              ...d,
+              appointmentStatus: 'cancel',
+            }),
+          );
+
+          await queryRunner.manager.save(oldAppointments);
+
+          oldSchedule.appointments = oldAppointments;
+
+          await queryRunner.manager.save(oldSchedule);
+
+          await queryRunner.manager.save(newSchedule);
+
+          tempSchedule.status = 'cancelled';
+
+          await queryRunner.manager.save(tempSchedule);
+        }
+
+        await queryRunner.commitTransaction();
+      } catch (e) {
+        await queryRunner.rollbackTransaction();
+        throw e;
+      } finally {
+        await queryRunner.release();
+      }
     } catch (e) {
       if (e instanceof QueryFailedError) {
         if ((e as any).code === '23505') {

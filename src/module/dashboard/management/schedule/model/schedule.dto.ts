@@ -1,4 +1,11 @@
-import { IsBoolean, IsEnum, IsNumber, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsIn,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { ScheduleDay } from 'src/database/entities/fixedschedule.entity';
 
 export class FixedScheduleCreateDTO {
@@ -70,4 +77,36 @@ export class ScheduleCreateDTO {
 
   @IsNumber()
   doctorId: number;
+}
+
+export class ScheduleChangeDTO {
+  @IsNumber()
+  id: number;
+
+  @IsString()
+  date: string;
+
+  @IsNumber()
+  capacity: number;
+
+  @IsString()
+  startTime: string;
+
+  @IsString()
+  endTime: string;
+
+  @IsNumber()
+  roomId: number;
+}
+
+export class ScheduleApprovalDTO {
+  @IsNumber()
+  id: number;
+
+  @IsIn(['reject', 'approve', 'cancel'])
+  action: string;
+
+  @IsOptional()
+  @IsNumber()
+  roomId: number;
 }

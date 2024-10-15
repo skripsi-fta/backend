@@ -29,10 +29,10 @@ export class ScheduleTemp {
   })
   status: string;
 
-  @Column()
+  @Column({ type: 'time' })
   startTime: string;
 
-  @Column()
+  @Column({ type: 'time' })
   endTime: string;
 
   @CreateDateColumn()
