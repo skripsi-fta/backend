@@ -38,7 +38,7 @@ export class Schedule {
 
   @OneToOne(() => Schedule, { nullable: true })
   @JoinColumn()
-  movedTo: number;
+  movedTo: Schedule;
 
   @Column({ type: 'time' })
   startTime: string;
