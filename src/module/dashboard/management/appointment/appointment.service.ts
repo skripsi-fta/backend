@@ -36,10 +36,28 @@ export class AppointmentService {
     appointmentStatus: string,
   ) {
     const [data, count] = await this.appointmentRepository.findAndCount({
+      select: [
+        'id',
+        'bookingCode',
+        'bookingQr',
+        'appointmentStatus',
+        'medicalRecord',
+        'isCheckIn',
+      ],
       skip: (pageNumber - 1) * pageSize,
       take: pageSize,
       order: {
-        id: 'ASC',
+        schedule: {
+          date: 'ASC',
+        },
+      },
+      relations: {
+        patient: true,
+        schedule: {
+          doctor: true,
+          room: true,
+        },
+        medicalRecord: true,
       },
       where: {
         id: id ? id : undefined,
@@ -48,9 +66,22 @@ export class AppointmentService {
       },
     });
 
+    const result = data.map((appointment) => ({
+      id: appointment.id,
+      bookingCode: appointment.bookingCode,
+      bookingQr: appointment.bookingQr,
+      patientName: appointment.patient.name,
+      appointmentStatus: appointment.appointmentStatus,
+      doctorName: appointment.schedule.doctor.name,
+      roomName: appointment.schedule.room.name,
+      medicalRecord: appointment.medicalRecord.id,
+      checkInStatus: appointment.isCheckIn,
+      scheduleDate: appointment.schedule.date,
+    }));
+
     return {
       totalRows: count,
-      list: data,
+      list: result,
     };
   }
 
