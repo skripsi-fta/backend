@@ -70,12 +70,27 @@ export class AppointmentService {
       id: appointment.id,
       bookingCode: appointment.bookingCode,
       bookingQr: appointment.bookingQr,
+      patientId: appointment.patient.id,
       patientName: appointment.patient.name,
       appointmentStatus: appointment.appointmentStatus,
       doctorName: appointment.schedule.doctor.name,
       roomName: appointment.schedule.room.name,
-      medicalRecord: appointment.medicalRecord.id,
+      medicalRecord: appointment.medicalRecord
+        ? {
+            id: appointment.medicalRecord.id,
+            height: appointment.medicalRecord.height,
+            weight: appointment.medicalRecord.weight,
+            systolic: appointment.medicalRecord.systolic,
+            diastolic: appointment.medicalRecord.diastolic,
+            temperature: appointment.medicalRecord.temperature,
+            illness: appointment.medicalRecord.illness,
+            diagnosisDoctor: appointment.medicalRecord.diagnosisDoctor,
+            prescription: appointment.medicalRecord.prescription,
+            notes: appointment.medicalRecord.notes,
+          }
+        : null,
       checkInStatus: appointment.isCheckIn,
+      scheduleId: appointment.schedule.id,
       scheduleDate: appointment.schedule.date,
     }));
 
