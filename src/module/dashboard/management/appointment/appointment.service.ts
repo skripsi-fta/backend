@@ -76,6 +76,7 @@ export class AppointmentService {
       roomName: appointment.schedule.room.name,
       medicalRecord: appointment.medicalRecord.id,
       checkInStatus: appointment.isCheckIn,
+      scheduleId: appointment.schedule.id,
       scheduleDate: appointment.schedule.date,
     }));
 
