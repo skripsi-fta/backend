@@ -5,7 +5,7 @@ import {
   AppointmentStatus,
 } from 'src/database/entities/appointment.entitity';
 import { LoggerService } from 'src/module/logger/logger.service';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { AppointmentPostDTO, AppointmentPutDTO } from './model/appointment.dto';
 import { Patient } from 'src/database/entities/patient.entity';
 import { StatusCodes } from 'http-status-codes';
@@ -34,6 +34,8 @@ export class AppointmentService {
     id: number,
     bookingCode: string,
     appointmentStatus: string,
+    fromDate: string,
+    toDate: string,
   ) {
     const [data, count] = await this.appointmentRepository.findAndCount({
       select: [
@@ -63,6 +65,12 @@ export class AppointmentService {
         id: id ? id : undefined,
         bookingCode: bookingCode ? bookingCode : undefined,
         appointmentStatus: appointmentStatus ? appointmentStatus : undefined,
+        schedule: {
+          date:
+            fromDate && toDate
+              ? Between(new Date(fromDate), new Date(toDate))
+              : undefined,
+        },
       },
     });
 
@@ -117,6 +125,19 @@ export class AppointmentService {
       throw new ResponseError('Schedule not found', StatusCodes.CONFLICT);
     }
 
+    if (scheduleExist.status !== 'ready') {
+      throw new ResponseError('Schedule not available', StatusCodes.CONFLICT);
+    }
+
+    const countAppointmentBySchedule = await this.appointmentRepository.count({
+      where: { schedule: { id: req.scheduleId } },
+    });
+
+    // check schedule capcity
+    if (countAppointmentBySchedule >= scheduleExist.capacity) {
+      throw new ResponseError('Schedule already full', StatusCodes.CONFLICT);
+    }
+
     const appointmentExist = await this.appointmentRepository.findOne({
       where: {
         patient: { id: req.patientId },
@@ -130,11 +151,6 @@ export class AppointmentService {
         'Patient already registered on this schedule',
         StatusCodes.CONFLICT,
       );
-    }
-
-    // capacity check(?)
-    if (scheduleExist.capacity <= 0 || scheduleExist.status !== 'ready') {
-      throw new ResponseError('Schedule not available', StatusCodes.CONFLICT);
     }
 
     const bookingCode = this.generateBookingCode();
@@ -183,26 +199,20 @@ export class AppointmentService {
       throw new ResponseError('Schedule not found', StatusCodes.CONFLICT);
     }
 
-    if (scheduleExist.capacity <= 0 || scheduleExist.status !== 'ready') {
+    if (scheduleExist.status !== 'ready') {
       throw new ResponseError('Schedule not available', StatusCodes.CONFLICT);
     }
 
-    const medicalRecordExist = await this.medicalRepository.findOne({
-      relations: {
-        patient: true,
-      },
-      where: { id: req.medicalRecordId },
+    const countAppointmentBySchedule = await this.appointmentRepository.count({
+      where: { schedule: { id: req.scheduleId } },
     });
 
-    if (
-      !medicalRecordExist ||
-      medicalRecordExist.patient.id !== appointment.patient.id
-    ) {
-      throw new ResponseError('Medical Record not found', StatusCodes.CONFLICT);
+    // check schedule capcity
+    if (countAppointmentBySchedule >= scheduleExist.capacity) {
+      throw new ResponseError('Schedule already full', StatusCodes.CONFLICT);
     }
 
     appointment.schedule = scheduleExist;
-    appointment.medicalRecord = medicalRecordExist;
 
     const result = await this.appointmentRepository.save(appointment);
     return {
@@ -219,6 +229,9 @@ export class AppointmentService {
     }
 
     const appointment = await this.appointmentRepository.findOne({
+      relations: {
+        schedule: true,
+      },
       where: { bookingCode: bookingCode },
     });
 
@@ -234,8 +247,42 @@ export class AppointmentService {
     }
 
     if (status === AppointmentStatus.CHECKIN) {
+      const today = new Date().setHours(0, 0, 0, 0);
+      const appointmentDate = new Date(appointment.schedule.date).setHours(
+        0,
+        0,
+        0,
+        0,
+      );
+      if (appointmentDate !== today) {
+        throw new ResponseError(
+          'Appointment is not today',
+          StatusCodes.CONFLICT,
+        );
+      }
+
       appointment.isCheckIn = true;
       appointment.checkInTime = new Date();
+
+      // check latest global queue
+      const latestGlobalQueue = await this.appointmentRepository.findOne({
+        select: ['id', 'globalQueue'],
+        order: {
+          globalQueue: 'DESC',
+        },
+        where: {
+          schedule: {
+            date: new Date(),
+          },
+          appointmentStatus: AppointmentStatus.CHECKIN,
+        },
+      });
+
+      appointment.globalQueue = latestGlobalQueue
+        ? latestGlobalQueue.globalQueue + 1
+        : 1;
+
+      this.log.info('update Queue' + appointment.globalQueue);
     }
 
     if (status === AppointmentStatus.DONE) {

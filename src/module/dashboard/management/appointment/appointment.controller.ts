@@ -25,6 +25,8 @@ export class AppointmentController {
     @Query('id') id: number,
     @Query('bookingCode') bookingCode: string,
     @Query('appointmentStatus') appointmentStatus: string,
+    @Query('fromDate') fromDate: string,
+    @Query('toDate') toDate: string,
     @Query('pageSize', new DefaultValuePipe(0)) pageSize: number,
     @Query('pageNumber', new DefaultValuePipe(1)) pageNumber: number,
   ) {
@@ -34,6 +36,8 @@ export class AppointmentController {
       id,
       bookingCode,
       appointmentStatus,
+      fromDate,
+      toDate,
     );
 
     return sendResponse(res, {
