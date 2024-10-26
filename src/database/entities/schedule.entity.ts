@@ -32,7 +32,7 @@ export class Schedule {
 
   @Column({
     type: 'enum',
-    enum: ['ready', 'in review', 'cancelled', 'changed'],
+    enum: ['ready', 'in review', 'cancelled', 'changed', 'finish'],
   })
   status: string;
 

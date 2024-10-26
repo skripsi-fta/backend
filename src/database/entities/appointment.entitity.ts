@@ -94,6 +94,9 @@ export class Appointment {
   @JoinColumn()
   medicalRecord: MedicalRecord;
 
+  @Column({ nullable: true })
+  globalQueue: number;
+
   @OneToOne(() => DoctorQueue, (doctorQueue) => doctorQueue.id, {
     nullable: true,
   })
