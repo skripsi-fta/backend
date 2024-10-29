@@ -6,6 +6,9 @@ export class PharmacyQueue {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column()
+  queueNumber: number;
+
   @Column({
     type: 'time',
   })

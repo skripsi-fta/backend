@@ -6,6 +6,9 @@ export class CashierQueue {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column()
+  queueNumber: number;
+
   @Column({
     type: 'time',
   })
