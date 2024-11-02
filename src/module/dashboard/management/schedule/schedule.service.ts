@@ -811,6 +811,8 @@ export class ScheduleManagementService {
 
       const queryRunner = this.dataSource.createQueryRunner();
 
+      await queryRunner.startTransaction();
+
       try {
         const capacity = oldSchedule.capacity;
 
@@ -866,6 +868,7 @@ export class ScheduleManagementService {
 
         await queryRunner.commitTransaction();
       } catch (e) {
+        console.log(e);
         await queryRunner.rollbackTransaction();
 
         await queryRunner.release();

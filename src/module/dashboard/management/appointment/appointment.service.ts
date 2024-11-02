@@ -5,7 +5,7 @@ import {
   AppointmentStatus,
 } from 'src/database/entities/appointment.entitity';
 import { LoggerService } from 'src/module/logger/logger.service';
-import { Between, Repository } from 'typeorm';
+import { Between, Repository, type FindOptionsWhere } from 'typeorm';
 import { AppointmentPostDTO, AppointmentPutDTO } from './model/appointment.dto';
 import { Patient } from 'src/database/entities/patient.entity';
 import { StatusCodes } from 'http-status-codes';
@@ -13,6 +13,7 @@ import { ResponseError } from 'src/utils/api.utils';
 import { Schedule } from 'src/database/entities/schedule.entity';
 import { MedicalRecord } from 'src/database/entities/medicalrecord.entity';
 import { generateQRCode } from 'src/utils/qrcode.utils';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class AppointmentService {
@@ -34,9 +35,31 @@ export class AppointmentService {
     id: number,
     bookingCode: string,
     appointmentStatus: string,
-    fromDate: string,
-    toDate: string,
+    startDate: string,
+    endDate: string,
+    startTime: string,
+    endTime: string,
   ) {
+    let whereSchedule: FindOptionsWhere<Schedule> = {};
+
+    if (startTime && endTime) {
+      whereSchedule = { startTime: Between(startTime, endTime) };
+    } else if (startTime) {
+      whereSchedule = { startTime: Between(startTime, '23:59:59') };
+    } else if (endTime) {
+      whereSchedule = { startTime: Between('00:00', endTime) };
+    }
+
+    if (startDate || endDate) {
+      whereSchedule = {
+        ...whereSchedule,
+        date: Between(
+          dayjs(startDate, 'YYYY-MM-DD').toDate(),
+          dayjs(endDate, 'YYYY-MM-DD').toDate(),
+        ),
+      };
+    }
+
     const [data, count] = await this.appointmentRepository.findAndCount({
       select: [
         'id',
@@ -65,12 +88,7 @@ export class AppointmentService {
         id: id ? id : undefined,
         bookingCode: bookingCode ? bookingCode : undefined,
         appointmentStatus: appointmentStatus ? appointmentStatus : undefined,
-        schedule: {
-          date:
-            fromDate && toDate
-              ? Between(new Date(fromDate), new Date(toDate))
-              : undefined,
-        },
+        schedule: whereSchedule,
       },
     });
 
@@ -100,6 +118,9 @@ export class AppointmentService {
       checkInStatus: appointment.isCheckIn,
       scheduleId: appointment.schedule.id,
       scheduleDate: appointment.schedule.date,
+      startTime: appointment.schedule.startTime.substring(0, 5),
+      endTime: appointment.schedule.endTime.substring(0, 5),
+      date: `${appointment.schedule.date} ${appointment.schedule.startTime.substring(0, 5)} - ${appointment.schedule.endTime.substring(0, 5)}`,
     }));
 
     return {
@@ -264,7 +285,6 @@ export class AppointmentService {
       appointment.isCheckIn = true;
       appointment.checkInTime = new Date();
 
-      // check latest global queue
       const latestGlobalQueue = await this.appointmentRepository.findOne({
         select: ['id', 'globalQueue'],
         order: {
@@ -272,7 +292,7 @@ export class AppointmentService {
         },
         where: {
           schedule: {
-            date: new Date(),
+            id: appointment.schedule.id,
           },
           appointmentStatus: AppointmentStatus.CHECKIN,
         },
@@ -292,9 +312,8 @@ export class AppointmentService {
     appointment.appointmentStatus = status;
 
     const result = await this.appointmentRepository.save(appointment);
-    return {
-      data: result,
-    };
+
+    return result;
   }
 
   generateBookingCode(): string {

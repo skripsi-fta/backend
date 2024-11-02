@@ -25,8 +25,10 @@ export class AppointmentController {
     @Query('id') id: number,
     @Query('bookingCode') bookingCode: string,
     @Query('appointmentStatus') appointmentStatus: string,
-    @Query('fromDate') fromDate: string,
-    @Query('toDate') toDate: string,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+    @Query('startTime') startTime: string,
+    @Query('endTime') endTime: string,
     @Query('pageSize', new DefaultValuePipe(0)) pageSize: number,
     @Query('pageNumber', new DefaultValuePipe(1)) pageNumber: number,
   ) {
@@ -36,8 +38,10 @@ export class AppointmentController {
       id,
       bookingCode,
       appointmentStatus,
-      fromDate,
-      toDate,
+      startDate,
+      endDate,
+      startTime,
+      endTime,
     );
 
     return sendResponse(res, {
@@ -80,7 +84,6 @@ export class AppointmentController {
     @Res() res: Response,
     @Body() req: { bookingCode: string },
   ) {
-    console.log(req.bookingCode);
     const data = await this.appointmentService.updateAppointmentStatus(
       req.bookingCode,
       AppointmentStatus.CHECKIN,
