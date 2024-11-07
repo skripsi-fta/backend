@@ -61,6 +61,12 @@ export class AppointmentDoctorService {
       where: {
         date: new Date(),
         status: 'ready',
+        doctor: {
+          id: doctorId[0].doctor_id,
+        },
+      },
+      relations: {
+        doctor: true,
       },
     });
 
