@@ -147,7 +147,7 @@ export class AppointmentDoctorService {
       },
       canFinish: Boolean(
         Number(scheduleDetail[0].totalfinished) ===
-          Number(scheduleDetail[0].total) && now.isAfter(scheduleDate),
+          Number(scheduleDetail[0].total) || now.isAfter(scheduleDate),
       ),
       currentQueueNumber: doctorQueueNumber,
     };
