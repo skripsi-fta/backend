@@ -1,4 +1,14 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Get,
+  Post,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { StaffRole } from 'src/database/entities/staff.entity';
 import { Roles } from 'src/decorator/role.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt.guards';
@@ -6,8 +16,10 @@ import { RoleGuard } from '../../auth/guards/role.guards';
 import { LoggerService } from 'src/module/logger/logger.service';
 import { AppointmentDoctorService } from './appointment.service';
 import { UserDTO } from '../../auth/model/auth.dto';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { sendResponse } from 'src/utils/api.utils';
+import { StatusCodes } from 'http-status-codes';
+import type { CheckAppointmentDTO } from './model/appointment.dto';
 
 @Controller('')
 @Roles(StaffRole.MANAGEMENT, StaffRole.DOCTOR)
@@ -19,15 +31,53 @@ export class AppointmentDoctorController {
   ) {}
 
   @Get('')
-  async getCurrentAppointment(@Req() req: Request) {
+  async getDetailCurrentAppointment(@Req() req: Request, @Res() res: Response) {
     const user = req.user as UserDTO;
 
-    const result = await this.appointmentService.getCurrentAppointment({
+    const result = await this.appointmentService.getDetailCurrentAppointment({
       user,
     });
 
-    console.log(result);
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      message: 'Success - GET Current Appointment',
+      data: result,
+    });
+  }
 
-    return 'yes';
+  @Get('list')
+  async getListAppointment(
+    @Res() res: Response,
+    @Query('pageSize', new DefaultValuePipe(0))
+    pageSize: number,
+    @Query('pageNumber', new DefaultValuePipe(1)) pageNumber: number,
+  ) {
+    const data = await this.appointmentService.getListAppointment({
+      pageNumber,
+      pageSize,
+    });
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      message: 'Success - GET List Appointment',
+      pageSize: Number(pageSize) || 0,
+      pageNumber: Number(pageNumber) || 1,
+      totalRows: data.totalRows,
+      data: data.list,
+    });
+  }
+
+  @Post('check')
+  async checkAppointment(
+    @Res() res: Response,
+    @Body() body: CheckAppointmentDTO,
+  ) {
+    const data = await this.appointmentService.checkAppointment(body);
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      message: 'Success - POST Check Appointment',
+      data,
+    });
   }
 }

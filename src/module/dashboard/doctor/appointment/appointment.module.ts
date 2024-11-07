@@ -10,6 +10,7 @@ import { ScheduleTemp } from 'src/database/entities/scheduletemp.entity';
 import { AppointmentDoctorController } from './appointment.controller';
 import { AppointmentDoctorService } from './appointment.service';
 import { Staff } from 'src/database/entities/staff.entity';
+import { CashierQueue } from 'src/database/entities/cashierqueue.entity';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { Staff } from 'src/database/entities/staff.entity';
       Room,
       ScheduleTemp,
       Staff,
+      CashierQueue,
     ]),
   ],
   controllers: [AppointmentDoctorController],

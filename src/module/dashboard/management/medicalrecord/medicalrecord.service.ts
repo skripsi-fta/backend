@@ -10,7 +10,10 @@ import {
 import { Patient } from 'src/database/entities/patient.entity';
 import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
-import { Appointment } from 'src/database/entities/appointment.entitity';
+import {
+  Appointment,
+  AppointmentStatus,
+} from 'src/database/entities/appointment.entitity';
 import { DoctorQueue } from 'src/database/entities/doctorqueue.entity';
 
 @Injectable()
@@ -153,6 +156,7 @@ export class MedicalrecordService {
     doctorQueue.queueNumber = doctorQueueNumber;
 
     appointmentExist.doctorQueue = doctorQueue;
+    appointmentExist.appointmentStatus = AppointmentStatus.DOCTORQUEUE;
 
     await this.doctorQueueRepository.save(doctorQueue);
 

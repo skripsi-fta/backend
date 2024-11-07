@@ -5,7 +5,7 @@ import {
   AppointmentStatus,
 } from 'src/database/entities/appointment.entitity';
 import { LoggerService } from 'src/module/logger/logger.service';
-import { Between, Repository, type FindOptionsWhere } from 'typeorm';
+import { Between, Repository, FindOptionsWhere, Not } from 'typeorm';
 import { AppointmentPostDTO, AppointmentPutDTO } from './model/appointment.dto';
 import { Patient } from 'src/database/entities/patient.entity';
 import { StatusCodes } from 'http-status-codes';
@@ -294,7 +294,7 @@ export class AppointmentService {
           schedule: {
             id: appointment.schedule.id,
           },
-          appointmentStatus: AppointmentStatus.CHECKIN,
+          appointmentStatus: Not(AppointmentStatus.SCHEDULED),
         },
       });
 
