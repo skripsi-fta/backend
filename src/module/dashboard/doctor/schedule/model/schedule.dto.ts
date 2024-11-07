@@ -22,3 +22,8 @@ export class RequestChangeScheduleDTO {
   @IsNumber()
   doctorId: number;
 }
+
+export class FinishScheduleDTO {
+  @IsNumber()
+  scheduleId: number;
+}

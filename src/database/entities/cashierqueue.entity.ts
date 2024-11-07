@@ -16,6 +16,7 @@ export class CashierQueue {
 
   @Column({
     type: 'time',
+    nullable: true,
   })
   finishTime: Date;
 

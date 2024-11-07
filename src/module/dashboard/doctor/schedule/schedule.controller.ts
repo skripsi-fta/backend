@@ -1,11 +1,14 @@
-import { Body, Controller, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Put, Res, UseGuards } from '@nestjs/common';
 import { StaffRole } from 'src/database/entities/staff.entity';
 import { Roles } from 'src/decorator/role.decorator';
 import { RoleGuard } from '../../auth/guards/role.guards';
 import { JwtAuthGuard } from '../../auth/guards/jwt.guards';
 import { LoggerService } from 'src/module/logger/logger.service';
 import { ScheduleDoctorService } from './schedule.service';
-import type { RequestChangeScheduleDTO } from './model/schedule.dto';
+import type {
+  FinishScheduleDTO,
+  RequestChangeScheduleDTO,
+} from './model/schedule.dto';
 import { sendResponse } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import type { Response } from 'express';
@@ -30,6 +33,16 @@ export class ScheduleDoctorController {
       statusCode: StatusCodes.CREATED,
       message: 'Success - Request Schedule',
       data: data,
+    });
+  }
+
+  @Put('finish')
+  async finishSchedule(@Res() res: Response, @Body() body: FinishScheduleDTO) {
+    await this.scheduleService.finishSchedule(body);
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.ACCEPTED,
+      message: 'Success - Finish Schedule',
     });
   }
 }

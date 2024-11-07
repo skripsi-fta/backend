@@ -16,7 +16,7 @@ import {
 } from 'src/database/entities/appointment.entitity';
 import { Schedule } from 'src/database/entities/schedule.entity';
 import * as dayjs from 'dayjs';
-import { CashierQueue } from 'src/database/entities/cashierqueue.entity';
+import { PharmacyQueue } from 'src/database/entities/pharmacyqueue.entity';
 
 @Injectable()
 export class AppointmentDoctorService {
@@ -31,8 +31,8 @@ export class AppointmentDoctorService {
     private readonly appointmentRepository: Repository<Appointment>,
     @InjectRepository(Schedule)
     private readonly scheduleRepository: Repository<Schedule>,
-    @InjectRepository(CashierQueue)
-    private readonly cashierQueueRepository: Repository<CashierQueue>,
+    @InjectRepository(PharmacyQueue)
+    private readonly pharmacyQueueRepository: Repository<PharmacyQueue>,
   ) {}
 
   async getDetailCurrentAppointment(body: CurrentAppointmentDTO) {
@@ -90,12 +90,12 @@ export class AppointmentDoctorService {
       `
         SELECT
             COUNT(*) as total,
-            COUNT(CASE WHEN a.finish_time IS NOT NULL THEN 1 END) as totalfinished,
-            COUNT(CASE WHEN a.finish_time IS NULL THEN 1 END) as totalwaiting
+            COUNT(CASE WHEN a.appointment_status != 'doctor queue' THEN 1 END) as totalfinished,
+            COUNT(CASE WHEN a.appointment_status = 'doctor queue' THEN 1 END) as totalwaiting
         FROM
             appointment a
         WHERE
-            a.appointment_status = 'doctor queue' AND a.schedule_id = $1
+            a.appointment_status IN ('doctor queue', 'pharmacy queue', 'cashier queue', 'done') AND a.schedule_id = $1
       `,
       [scheduleId],
     )) as Array<{ total: number; totalfinished: number; totalwaiting: number }>;
@@ -103,27 +103,31 @@ export class AppointmentDoctorService {
     const currentDoctorQueue = (await this.dataSource.query(
       `
         SELECT
-            dq.queue_number
+            dq.queue_number,
+            a.*
         FROM
             appointment a
         JOIN
             doctor_queue dq ON a.doctor_queue_id = dq.id
         WHERE
             a.schedule_id = $1 AND
-            a.appointment_status = 'doctor queue' AND
-            a.pharmacy_queue_id IS NOT NULL
+            a.appointment_status = 'doctor queue'
         ORDER BY
-            dq.queue_number DESC
+            dq.queue_number ASC
         LIMIT 1
       `,
       [scheduleId],
     )) as Array<{ queue_number: string }>;
 
-    let doctorQueueNumber = 1;
+    let doctorQueueNumber = '-';
 
     if (currentDoctorQueue.length === 1) {
-      doctorQueueNumber = Number(currentDoctorQueue[0].queue_number);
+      doctorQueueNumber = Number(currentDoctorQueue[0].queue_number).toString();
     }
+
+    const scheduleDate = dayjs(
+      `${closestSchedule.date} ${closestSchedule.endTime}`,
+    );
 
     return {
       scheduleId,
@@ -135,6 +139,10 @@ export class AppointmentDoctorService {
         startTime: closestSchedule.startTime.substring(0, 5),
         endTime: closestSchedule.endTime.substring(0, 5),
       },
+      canFinish: Boolean(
+        Number(scheduleDetail[0].totalfinished) ===
+          Number(scheduleDetail[0].total) && now.isAfter(scheduleDate),
+      ),
       currentQueueNumber: doctorQueueNumber,
     };
   }
@@ -206,7 +214,7 @@ export class AppointmentDoctorService {
       appointment.notes = body.notes;
       appointment.appointmentStatus = AppointmentStatus.CASHIERQUEUE;
 
-      const cashierQueueLatest = await this.cashierQueueRepository.findOne({
+      const pharmacyQueueLatest = await this.pharmacyQueueRepository.findOne({
         select: ['id', 'queueNumber'],
         order: {
           queueNumber: 'DESC',
@@ -216,16 +224,16 @@ export class AppointmentDoctorService {
         },
       });
 
-      const cashierQueue = new CashierQueue();
+      const pharmacyQueue = new PharmacyQueue();
 
-      cashierQueue.date = new Date();
-      cashierQueue.startTime = new Date();
+      pharmacyQueue.date = new Date();
+      pharmacyQueue.startTime = new Date();
 
-      cashierQueue.queueNumber = cashierQueueLatest.queueNumber + 1;
+      pharmacyQueue.queueNumber = (pharmacyQueueLatest?.queueNumber ?? 0) + 1;
 
-      await queryRunner.manager.save(cashierQueue);
+      await queryRunner.manager.save(pharmacyQueue);
 
-      appointment.cashierQueue = cashierQueue;
+      appointment.pharmacyQueue = pharmacyQueue;
 
       await queryRunner.manager.save(appointment);
 

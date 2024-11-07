@@ -6,7 +6,10 @@ import { Schedule } from 'src/database/entities/schedule.entity';
 import { ScheduleTemp } from 'src/database/entities/scheduletemp.entity';
 import { LoggerService } from 'src/module/logger/logger.service';
 import { Repository, DataSource, QueryFailedError } from 'typeorm';
-import type { RequestChangeScheduleDTO } from './model/schedule.dto';
+import type {
+  FinishScheduleDTO,
+  RequestChangeScheduleDTO,
+} from './model/schedule.dto';
 import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import { ScheduleManagementService } from '../../management/schedule/schedule.service';
@@ -65,5 +68,23 @@ export class ScheduleDoctorService {
 
       throw e;
     }
+  }
+
+  async finishSchedule(body: FinishScheduleDTO) {
+    const schedule = await this.scheduleRepository.findOne({
+      where: {
+        id: body.scheduleId,
+      },
+    });
+
+    if (!schedule) {
+      throw new ResponseError('Schedule not found', StatusCodes.NOT_FOUND);
+    }
+
+    schedule.status = 'finish';
+
+    await this.scheduleRepository.save(schedule);
+
+    return true;
   }
 }
