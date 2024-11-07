@@ -150,14 +150,19 @@ export class AppointmentDoctorService {
   async getListAppointment({
     pageNumber,
     pageSize,
+    scheduleId,
   }: {
     pageNumber: number;
     pageSize: number;
+    scheduleId: number;
   }) {
     const [data, count] = await this.appointmentRepository.findAndCount({
       where: {
         appointmentStatus: AppointmentStatus.DOCTORQUEUE,
         doctorQueue: Not(IsNull()),
+        schedule: {
+          id: scheduleId,
+        },
       },
       skip: (pageNumber - 1) * pageSize,
       take: pageSize,
@@ -165,6 +170,7 @@ export class AppointmentDoctorService {
         patient: true,
         doctorQueue: true,
         medicalRecord: true,
+        schedule: true,
       },
       order: {
         doctorQueue: {

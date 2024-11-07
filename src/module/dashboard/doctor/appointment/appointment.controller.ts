@@ -51,10 +51,12 @@ export class AppointmentDoctorController {
     @Query('pageSize', new DefaultValuePipe(0))
     pageSize: number,
     @Query('pageNumber', new DefaultValuePipe(1)) pageNumber: number,
+    @Query('scheduleId') scheduleId: number,
   ) {
     const data = await this.appointmentService.getListAppointment({
       pageNumber,
       pageSize,
+      scheduleId,
     });
 
     return sendResponse(res, {
