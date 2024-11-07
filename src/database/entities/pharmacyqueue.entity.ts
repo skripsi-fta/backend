@@ -16,6 +16,7 @@ export class PharmacyQueue {
 
   @Column({
     type: 'time',
+    nullable: true,
   })
   finishTime: Date;
 
