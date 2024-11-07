@@ -6,11 +6,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Patient } from 'src/database/entities/patient.entity';
 import { MedicalRecord } from 'src/database/entities/medicalrecord.entity';
 import { Appointment } from 'src/database/entities/appointment.entitity';
+import { DoctorQueue } from 'src/database/entities/doctorqueue.entity';
 
 @Module({
   imports: [
     LoggerModule,
-    TypeOrmModule.forFeature([Patient, MedicalRecord, Appointment]),
+    TypeOrmModule.forFeature([
+      Patient,
+      MedicalRecord,
+      Appointment,
+      DoctorQueue,
+    ]),
   ],
   controllers: [MedicalrecordController],
   providers: [MedicalrecordService],

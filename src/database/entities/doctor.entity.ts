@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   OneToOne,
@@ -55,6 +56,7 @@ export class Doctor {
   updatedAt: Date;
 
   @OneToOne(() => Staff, (staff) => staff.id, { nullable: true })
+  @JoinColumn()
   staff: Staff;
 
   @ManyToOne(() => Specialization, (specialization) => specialization.id, {

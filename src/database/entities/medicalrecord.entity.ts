@@ -44,10 +44,8 @@ export class MedicalRecord {
   })
   diagnosisDoctor: string;
 
-  @Column({
-    nullable: true,
-  })
-  prescription: string;
+  @Column('text', { nullable: true, array: true })
+  prescription: string[];
 
   @Column({
     type: 'varchar',

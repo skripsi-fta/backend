@@ -23,6 +23,7 @@ export class DoctorQueue {
 
   @Column({
     type: 'time',
+    nullable: true,
   })
   finishTime: Date;
 

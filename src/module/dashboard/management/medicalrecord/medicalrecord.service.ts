@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MedicalRecord } from 'src/database/entities/medicalrecord.entity';
 import { LoggerService } from 'src/module/logger/logger.service';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import {
   MedicalRecordPostDTO,
   MedicalRecordPutDTO,
@@ -10,18 +10,25 @@ import {
 import { Patient } from 'src/database/entities/patient.entity';
 import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
-import { Appointment } from 'src/database/entities/appointment.entitity';
+import {
+  Appointment,
+  AppointmentStatus,
+} from 'src/database/entities/appointment.entitity';
+import { DoctorQueue } from 'src/database/entities/doctorqueue.entity';
 
 @Injectable()
 export class MedicalrecordService {
   constructor(
     private log: LoggerService,
+    private readonly dataSource: DataSource,
     @InjectRepository(MedicalRecord)
     private readonly medicalRecordRepository: Repository<MedicalRecord>,
     @InjectRepository(Patient)
     private readonly patientRepository: Repository<Patient>,
     @InjectRepository(Appointment)
     private readonly appointmentRepository: Repository<Appointment>,
+    @InjectRepository(DoctorQueue)
+    private readonly doctorQueueRepository: Repository<DoctorQueue>,
   ) {}
 
   async getMedicalRecord(
@@ -61,7 +68,13 @@ export class MedicalrecordService {
     }
 
     const appointmentExist = await this.appointmentRepository.findOne({
-      relations: ['patient', 'medicalRecord'],
+      relations: {
+        patient: true,
+        medicalRecord: true,
+        schedule: {
+          doctor: true,
+        },
+      },
       where: [{ id: req.appointmentId }],
     });
 
@@ -109,6 +122,43 @@ export class MedicalrecordService {
     const result = await this.medicalRecordRepository.save(medicalRecord);
 
     appointmentExist.medicalRecord = result;
+
+    const latestDoctorQueue = (await this.dataSource.query(
+      `
+        SELECT
+            dq.queue_number
+        FROM
+            appointment a
+        JOIN
+            doctor_queue dq
+        ON
+            a.doctor_queue_id = dq.id
+        WHERE
+            schedule_id = $1
+        ORDER BY
+            dq.queue_number DESC
+        LIMIT 1
+      `,
+      [appointmentExist.schedule.id],
+    )) as Array<{ queue_number: number }>;
+
+    let doctorQueueNumber = 1;
+
+    if (latestDoctorQueue.length === 1) {
+      doctorQueueNumber = latestDoctorQueue[0].queue_number + 1;
+    }
+
+    const doctorQueue = new DoctorQueue();
+
+    doctorQueue.date = new Date();
+    doctorQueue.startTime = new Date();
+    doctorQueue.doctor = appointmentExist.schedule.doctor;
+    doctorQueue.queueNumber = doctorQueueNumber;
+
+    appointmentExist.doctorQueue = doctorQueue;
+    appointmentExist.appointmentStatus = AppointmentStatus.DOCTORQUEUE;
+
+    await this.doctorQueueRepository.save(doctorQueue);
 
     await this.appointmentRepository.save(appointmentExist);
 

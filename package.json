@@ -17,7 +17,10 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "dropdb": "dropdb -U postgres skripsi",
+    "createdb": "createdb -U postgres skripsi",
+    "importdb": "psql -U postgres skripsi < ./dump/skripsi.sql"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
