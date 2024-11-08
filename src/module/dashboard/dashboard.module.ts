@@ -13,6 +13,7 @@ import { DoctorManagementModule } from './management/doctor/doctor.module';
 import { DoctorModule } from './doctor/doctor.module';
 import { ScheduleDoctorModule } from './doctor/schedule/schedule.module';
 import { AppointmentDoctorModule } from './doctor/appointment/appointment.module';
+import { CashierModule } from './management/cashier/cashier.module';
 
 @Module({
   imports: [
@@ -59,6 +60,10 @@ import { AppointmentDoctorModule } from './doctor/appointment/appointment.module
           {
             path: 'appointment',
             module: AppointmentModule,
+          },
+          {
+            path: 'cashier',
+            module: CashierModule,
           },
         ],
       },

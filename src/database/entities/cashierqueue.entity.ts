@@ -1,4 +1,10 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Appointment } from './appointment.entitity';
 
 @Entity()
@@ -26,5 +32,6 @@ export class CashierQueue {
   date: Date;
 
   @OneToOne(() => Appointment, (appointment) => appointment.id)
+  @JoinColumn()
   appointment: Appointment;
 }
