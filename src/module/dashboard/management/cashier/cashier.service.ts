@@ -39,11 +39,16 @@ export class CashierService {
   }
 
   async getCashierQueue(pageSize: number, pageNumber: number) {
-    this.log.info('Get Cashier Queue: ' + new Date());
     const [data, count] = await this.appointmentRepository.findAndCount({
       relations: {
         cashierQueue: true,
         patient: true,
+        schedule: {
+          room: true,
+          doctor: {
+            specialization: true,
+          },
+        },
       },
       where: {
         appointmentStatus: AppointmentStatus.CASHIERQUEUE,
