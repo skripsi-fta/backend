@@ -13,12 +13,14 @@ import { DoctorManagementModule } from './management/doctor/doctor.module';
 import { DoctorModule } from './doctor/doctor.module';
 import { ScheduleDoctorModule } from './doctor/schedule/schedule.module';
 import { AppointmentDoctorModule } from './doctor/appointment/appointment.module';
+import { PharmacyModule } from './pharmacy/pharmacy.module';
 
 @Module({
   imports: [
     AuthModule,
     ManagementModule,
     DoctorModule,
+    PharmacyModule,
     RouterModule.register([
       {
         path: 'dashboard/auth',
@@ -75,6 +77,10 @@ import { AppointmentDoctorModule } from './doctor/appointment/appointment.module
             module: AppointmentDoctorModule,
           },
         ],
+      },
+      {
+        path: 'dashboard/pharmacy/antrian',
+        module: PharmacyModule,
       },
     ]),
   ],
