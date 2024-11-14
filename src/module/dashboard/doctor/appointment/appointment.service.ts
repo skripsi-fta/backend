@@ -224,7 +224,7 @@ export class AppointmentDoctorService {
       await queryRunner.manager.save(appointment.doctorQueue);
 
       appointment.notes = body.notes;
-      appointment.appointmentStatus = AppointmentStatus.CASHIERQUEUE;
+      appointment.appointmentStatus = AppointmentStatus.PHARMACYQUEUE;
 
       const pharmacyQueueLatest = await this.pharmacyQueueRepository.findOne({
         select: ['id', 'queueNumber'],

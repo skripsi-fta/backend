@@ -30,7 +30,6 @@ export class PharmacyController {
 
   @Get()
   async getDetailCurrentQueue(@Res() res: Response) {
-
     const result = await this.pharmacyService.getDetailCurrentQueue();
 
     return sendResponse(res, {
@@ -62,10 +61,7 @@ export class PharmacyController {
   }
 
   @Post()
-  async updateQueue(
-    @Res() res: Response,
-    @Body() body: PharmacyUpdateDTO,
-  ) {
+  async updateQueue(@Res() res: Response, @Body() body: PharmacyUpdateDTO) {
     const data = await this.pharmacyService.updatePharmacyQueue(body);
 
     return sendResponse(res, {

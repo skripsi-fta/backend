@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LoggerService } from 'src/module/logger/logger.service';
-import { DataSource, IsNull, Not, type Repository } from 'typeorm';
-import type {
-  PharmacyUpdateDTO
-} from './model/pharmacy.dto';
+import { DataSource, type Repository } from 'typeorm';
+import type { PharmacyUpdateDTO } from './model/pharmacy.dto';
 import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import {
@@ -91,7 +89,6 @@ export class PharmacyService {
   }
 
   async updatePharmacyQueue(body: PharmacyUpdateDTO) {
-
     const appointment = await this.appointmentRepository.findOne({
       where: { id: body.appointmentId },
       relations: {
