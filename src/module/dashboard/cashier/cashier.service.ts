@@ -25,13 +25,13 @@ export class CashierService {
 
   async getTotalCashierQueue() {
     const data = (await this.dataSource.query(
-      `select 
+      `select
         count(*) as total,
         count(case when cq.finish_time is null then 1 end) as totalWaiting,
         count(case when cq.finish_time notnull then 1 end) as totalFinished
       from appointment app
       join cashier_queue cq ON app.cashier_queue_id = cq.id
-      where appointment_status = 'cashier queue' and cashier_queue_id notnull and cq."date" = $1 `,
+      where appointment_status IN ('pharmacy queue', 'cashier queue', 'done') and cashier_queue_id notnull and cq."date" = $1 `,
       [dayjs().format('YYYY-MM-DD')],
     )) as Array<{ total: number; totalWaiting: number; totalFinished: number }>;
 
@@ -79,6 +79,9 @@ export class CashierService {
       },
       relations: {
         cashierQueue: true,
+        schedule: {
+          doctor: true,
+        },
       },
     });
 
@@ -101,6 +104,7 @@ export class CashierService {
       appointment.appointmentStatus = AppointmentStatus.DONE;
       appointment.finishTime = finishDate;
       appointment.cashierQueue.finishTime = finishDate;
+      appointment.consultationFee = appointment.schedule.doctor.consulePrice;
 
       await queryRunner.manager.save(appointment.cashierQueue);
       await queryRunner.manager.save(appointment);

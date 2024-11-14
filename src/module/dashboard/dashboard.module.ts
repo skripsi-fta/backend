@@ -14,7 +14,7 @@ import { DoctorModule } from './doctor/doctor.module';
 import { ScheduleDoctorModule } from './doctor/schedule/schedule.module';
 import { AppointmentDoctorModule } from './doctor/appointment/appointment.module';
 import { PharmacyModule } from './pharmacy/pharmacy.module';
-import { CashierModule } from './management/cashier/cashier.module';
+import { CashierModule } from './cashier/cashier.module';
 
 @Module({
   imports: [
@@ -22,6 +22,7 @@ import { CashierModule } from './management/cashier/cashier.module';
     ManagementModule,
     DoctorModule,
     PharmacyModule,
+    CashierModule,
     RouterModule.register([
       {
         path: 'dashboard/auth',
@@ -63,10 +64,6 @@ import { CashierModule } from './management/cashier/cashier.module';
             path: 'appointment',
             module: AppointmentModule,
           },
-          {
-            path: 'cashier',
-            module: CashierModule,
-          },
         ],
       },
       {
@@ -86,6 +83,10 @@ import { CashierModule } from './management/cashier/cashier.module';
       {
         path: 'dashboard/pharmacy/antrian',
         module: PharmacyModule,
+      },
+      {
+        path: 'dashboard/cashier',
+        module: CashierModule,
       },
     ]),
   ],
