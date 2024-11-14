@@ -68,6 +68,8 @@ export class AppointmentService {
         'appointmentStatus',
         'medicalRecord',
         'isCheckIn',
+        'checkInTime',
+        'finishTime',
       ],
       skip: (pageNumber - 1) * pageSize,
       take: pageSize,
@@ -121,6 +123,8 @@ export class AppointmentService {
       startTime: appointment.schedule.startTime.substring(0, 5),
       endTime: appointment.schedule.endTime.substring(0, 5),
       date: `${appointment.schedule.date} ${appointment.schedule.startTime.substring(0, 5)} - ${appointment.schedule.endTime.substring(0, 5)}`,
+      checkInTime: appointment.checkInTime,
+      finishTime: appointment.finishTime,
     }));
 
     return {
