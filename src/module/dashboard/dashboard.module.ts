@@ -14,6 +14,7 @@ import { DoctorModule } from './doctor/doctor.module';
 import { ScheduleDoctorModule } from './doctor/schedule/schedule.module';
 import { AppointmentDoctorModule } from './doctor/appointment/appointment.module';
 import { PharmacyModule } from './pharmacy/pharmacy.module';
+import { CashierModule } from './management/cashier/cashier.module';
 
 @Module({
   imports: [
@@ -61,6 +62,10 @@ import { PharmacyModule } from './pharmacy/pharmacy.module';
           {
             path: 'appointment',
             module: AppointmentModule,
+          },
+          {
+            path: 'cashier',
+            module: CashierModule,
           },
         ],
       },
