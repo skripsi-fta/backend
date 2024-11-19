@@ -19,7 +19,7 @@ export class Auth {
   })
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   phoneNumber: string;
 
   @Column()
