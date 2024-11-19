@@ -1,9 +1,20 @@
-import { Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { LocalGuard } from './guards/local.guards';
-import { Request } from 'express';
+import { Request, type Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt.guards';
 import { AuthService } from './auth.service';
 import { RefreshJwtGuard } from './guards/refresh-jwt.guards';
+import type { RegisterDTO } from './model/auth.dto';
+import { sendResponse } from 'src/utils/api.utils';
+import { StatusCodes } from 'http-status-codes';
 
 @Controller('')
 export class AuthController {
@@ -31,5 +42,16 @@ export class AuthController {
   @UseGuards(RefreshJwtGuard)
   async refresh(@Req() req: Request) {
     return await this.authService.refreshToken(req);
+  }
+
+  @Post('register')
+  async register(@Body() body: RegisterDTO, @Res() res: Response) {
+    const newData = await this.authService.registerUser(body);
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      message: 'Success - Register Patient',
+      data: newData,
+    });
   }
 }

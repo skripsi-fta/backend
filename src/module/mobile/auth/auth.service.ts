@@ -1,13 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { AuthDTO, type UserDTO } from './model/auth.dto';
+import { AuthDTO, RegisterDTO, UserDTO } from './model/auth.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import refreshJwtConfig from './config/refresh-jwt.config';
 import { ConfigType } from '@nestjs/config';
-import { comparePassword } from 'src/utils/bcrypt.utils';
+import { comparePassword, encodePassword } from 'src/utils/bcrypt.utils';
 import { Auth } from 'src/database/entities/auth.entitity';
+import { ResponseError } from 'src/utils/api.utils';
+import { StatusCodes } from 'http-status-codes';
 
 @Injectable()
 export class AuthService {
@@ -72,5 +74,34 @@ export class AuthService {
     return {
       token,
     };
+  }
+
+  async registerUser(body: RegisterDTO) {
+    const userExist = await this.authRepository.findOne({
+      where: {
+        ...(body.credentials.includes('@')
+          ? { email: body.credentials }
+          : { phoneNumber: body.credentials }),
+      },
+    });
+
+    if (userExist) {
+      throw new ResponseError(
+        'Email atau nomor telepon sudah terpakai!',
+        StatusCodes.CONFLICT,
+      );
+    }
+
+    const newUser = this.authRepository.create({
+      ...(body.credentials.includes('@')
+        ? { email: body.credentials }
+        : { phoneNumber: body.credentials }),
+    });
+
+    newUser.password = await encodePassword(body.password);
+
+    await this.authRepository.insert(newUser);
+
+    return newUser;
   }
 }

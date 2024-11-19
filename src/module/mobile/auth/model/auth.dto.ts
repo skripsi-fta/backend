@@ -15,3 +15,11 @@ export class UserDTO {
   email: string;
   role: StaffRole;
 }
+
+export class RegisterDTO {
+  @IsString()
+  credentials: string;
+
+  @IsString()
+  password: string;
+}
