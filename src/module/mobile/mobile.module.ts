@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { RouterModule } from '@nestjs/core';
 import { JanjiTemuModule } from './janjitemu/janjitemu.module';
+import { PatientModule } from './patient/patient.module';
 
 @Module({
   imports: [
@@ -15,6 +16,10 @@ import { JanjiTemuModule } from './janjitemu/janjitemu.module';
       {
         path: 'mobile/janjitemu',
         module: JanjiTemuModule,
+      },
+      {
+        path: 'mobile/patient',
+        module: PatientModule,
       },
     ]),
   ],
