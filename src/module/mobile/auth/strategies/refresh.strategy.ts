@@ -7,7 +7,7 @@ import { ConfigType } from '@nestjs/config';
 @Injectable()
 export class RefreshJwtStrategy extends PassportStrategy(
   Strategy,
-  'refresh-jwt',
+  'refresh-jwt-patient',
 ) {
   constructor(
     @Inject(refreshJwtConfig.KEY)
