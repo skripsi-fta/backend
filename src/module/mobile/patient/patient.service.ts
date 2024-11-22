@@ -2,8 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Patient } from 'src/database/entities/patient.entity';
 import { LoggerService } from 'src/module/logger/logger.service';
-import { Repository } from 'typeorm';
-import type { CheckPatientDTO, LinkPatientDTO } from './model/patient.dto';
+import { QueryFailedError, Repository } from 'typeorm';
+import type {
+  CheckPatientDTO,
+  CreatePatientDTO,
+  LinkPatientDTO,
+} from './model/patient.dto';
 import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import type { UserDTO } from '../auth/model/auth.dto';
@@ -46,10 +50,30 @@ export class PatientService {
       },
     });
 
+    if (!userQuery) {
+      throw new ResponseError('User not found', StatusCodes.NOT_FOUND);
+    }
+
     userQuery.patient = patientExist;
 
     await this.authRepository.save(userQuery);
 
     return userQuery;
+  }
+
+  async createPatient(body: CreatePatientDTO, user: UserDTO) {
+    try {
+    } catch (e) {
+      if (e instanceof QueryFailedError) {
+        if ((e as any).code === '23505') {
+          throw new ResponseError(
+            'ID Number sudah terdaftar',
+            StatusCodes.CONFLICT,
+          );
+        }
+      }
+
+      throw e;
+    }
   }
 }

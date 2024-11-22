@@ -1,6 +1,10 @@
 import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt.guards';
-import type { CheckPatientDTO, LinkPatientDTO } from './model/patient.dto';
+import type {
+  CheckPatientDTO,
+  CreatePatientDTO,
+  LinkPatientDTO,
+} from './model/patient.dto';
 import type { Request, Response } from 'express';
 import type { PatientService } from './patient.service';
 import { sendResponse } from 'src/utils/api.utils';
@@ -41,5 +45,11 @@ export class PatientController {
   }
 
   @Post('create')
-  async createPatient() {}
+  async createPatient(
+    @Body() body: CreatePatientDTO,
+    @Res() res: Response,
+    @Req() req: Request,
+  ) {
+    const user = req.user as UserDTO;
+  }
 }
