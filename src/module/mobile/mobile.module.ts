@@ -8,6 +8,7 @@ import { PatientModule } from './patient/patient.module';
   imports: [
     AuthModule,
     JanjiTemuModule,
+    PatientModule,
     RouterModule.register([
       {
         path: 'mobile/auth',

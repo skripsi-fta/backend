@@ -19,7 +19,7 @@ export class LinkPatientDTO {
 
 export class CreatePatientDTO {
   @IsString()
-  name: string;
+  nama: string;
 
   @IsString()
   address: string;

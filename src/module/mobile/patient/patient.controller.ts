@@ -6,7 +6,7 @@ import type {
   LinkPatientDTO,
 } from './model/patient.dto';
 import type { Request, Response } from 'express';
-import type { PatientService } from './patient.service';
+import { PatientService } from './patient.service';
 import { sendResponse } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import type { UserDTO } from '../auth/model/auth.dto';
@@ -46,10 +46,18 @@ export class PatientController {
 
   @Post('create')
   async createPatient(
-    @Body() body: CreatePatientDTO,
-    @Res() res: Response,
     @Req() req: Request,
+    @Res() res: Response,
+    @Body() body: CreatePatientDTO,
   ) {
     const user = req.user as UserDTO;
+
+    const newUserData = await this.patientService.createPatient(body, user);
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.ACCEPTED,
+      message: 'Success - Patient Created',
+      data: newUserData,
+    });
   }
 }
