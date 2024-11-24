@@ -7,6 +7,7 @@ import {
   Put,
   Query,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { AppointmentService } from './appointment.service';
 import { AppointmentPostDTO, AppointmentPutDTO } from './model/appointment.dto';
@@ -14,8 +15,12 @@ import { sendResponse } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import { Response } from 'express';
 import { AppointmentStatus } from 'src/database/entities/appointment.entitity';
+import { JwtAuthGuard } from '../../auth/guards/jwt.guards';
+import { Roles } from 'src/decorator/role.decorator';
+import { StaffRole } from 'src/database/entities/staff.entity';
 
 @Controller('')
+@UseGuards(JwtAuthGuard)
 export class AppointmentController {
   constructor(private appointmentService: AppointmentService) {}
 
@@ -80,6 +85,7 @@ export class AppointmentController {
   }
 
   @Post('checkin')
+  @Roles(StaffRole.MANAGEMENT, StaffRole.MONITORING)
   async checkInAppointment(
     @Res() res: Response,
     @Body() req: { bookingCode: string },

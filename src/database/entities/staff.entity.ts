@@ -16,6 +16,7 @@ export enum StaffRole {
   PHARMACIST = 'PHARMACIST',
   CASHIER = 'CASHIER',
   MANAGEMENT = 'MANAGEMENT',
+  MONITORING = 'MONITORING',
 }
 
 @Entity()
