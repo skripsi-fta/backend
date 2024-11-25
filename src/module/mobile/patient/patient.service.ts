@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Patient } from 'src/database/entities/patient.entity';
 import { LoggerService } from 'src/module/logger/logger.service';
-import { Repository } from 'typeorm';
+import { QueryFailedError, Repository } from 'typeorm';
 import type {
   CheckPatientDTO,
   CreatePatientDTO,
@@ -36,29 +36,45 @@ export class PatientService {
   }
 
   async linkPatient(body: LinkPatientDTO, user: UserDTO) {
-    const patientExist = await this.patientRepository.findOne({
-      where: [{ idNumber: body.idNumber, idType: body.idType }],
-    });
+    try {
+      const patientExist = await this.patientRepository.findOne({
+        where: [{ idNumber: body.idNumber, idType: body.idType }],
+      });
 
-    if (!patientExist) {
-      throw new ResponseError('Pasien tidak ditemukan', StatusCodes.NOT_FOUND);
+      if (!patientExist) {
+        throw new ResponseError(
+          'Pasien tidak ditemukan',
+          StatusCodes.NOT_FOUND,
+        );
+      }
+
+      const userQuery = await this.authRepository.findOne({
+        where: {
+          id: user.id,
+        },
+      });
+
+      if (!userQuery) {
+        throw new ResponseError('User not found', StatusCodes.NOT_FOUND);
+      }
+
+      userQuery.patient = patientExist;
+
+      await this.authRepository.save(userQuery);
+
+      return userQuery;
+    } catch (e) {
+      if (e instanceof QueryFailedError) {
+        if ((e as any).code === '23505') {
+          throw new ResponseError(
+            'Pasien sudah terdaftar menggunakan akun yang lain, silahkan menggunakan akun tersebut',
+            StatusCodes.CONFLICT,
+          );
+        }
+      }
+
+      throw e;
     }
-
-    const userQuery = await this.authRepository.findOne({
-      where: {
-        id: user.id,
-      },
-    });
-
-    if (!userQuery) {
-      throw new ResponseError('User not found', StatusCodes.NOT_FOUND);
-    }
-
-    userQuery.patient = patientExist;
-
-    await this.authRepository.save(userQuery);
-
-    return userQuery;
   }
 
   async createPatient(body: CreatePatientDTO, user: UserDTO) {
