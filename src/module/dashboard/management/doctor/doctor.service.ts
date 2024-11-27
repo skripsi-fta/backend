@@ -77,17 +77,16 @@ export class DoctorService {
   async addDoctor(data: DoctorPostDTO, image: Express.Multer.File) {
     let filePath = null;
 
-    if (image) {
-      filePath = await this.googleStorage.upload(image);
-      console.log(filePath);
-    }
-
     const specialization = await this.specializationRepository.findOne({
       where: { id: data.specializationId },
     });
 
     if (!specialization) {
       throw new ResponseError('Specialization not found', StatusCodes.CONFLICT);
+    }
+
+    if (image) {
+      filePath = await this.googleStorage.upload(image);
     }
 
     const doctor = this.doctorRepository.create({
@@ -110,22 +109,11 @@ export class DoctorService {
 
   async updateDoctor(req: DoctorPutDTO, image: Express.Multer.File) {
     try {
+      let filePath = null;
       const doctor = await this.doctorRepository.findOneBy({ id: req.id });
 
       if (!doctor) {
         throw new ResponseError('Doctor not found', StatusCodes.NOT_FOUND);
-      }
-
-      let filePath = null;
-
-      if (image) {
-        if (
-          doctor.photoPath &&
-          (await this.googleStorage.get(doctor.photoPath))
-        ) {
-          await this.googleStorage.delete(doctor.photoPath);
-        }
-        filePath = await this.googleStorage.upload(image);
       }
 
       let specialization = null;
@@ -140,6 +128,16 @@ export class DoctorService {
             StatusCodes.CONFLICT,
           );
         }
+      }
+
+      if (image) {
+        if (
+          doctor.photoPath &&
+          (await this.googleStorage.get(doctor.photoPath))
+        ) {
+          await this.googleStorage.delete(doctor.photoPath);
+        }
+        filePath = await this.googleStorage.upload(image);
       }
 
       doctor.name = req.name;
