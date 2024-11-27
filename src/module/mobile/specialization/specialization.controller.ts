@@ -17,7 +17,7 @@ export class SpecializationController {
 
     return sendResponse(res, {
       statusCode: StatusCodes.OK,
-      message: 'Success - Get Patient',
+      message: 'Success - Get Specialization Recommendation',
       data,
     });
   }
