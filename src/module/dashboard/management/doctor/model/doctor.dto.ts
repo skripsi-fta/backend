@@ -20,7 +20,7 @@ export class DoctorPostDTO {
 }
 
 export class DoctorPutDTO {
-  @IsNumber()
+  @IsNumberString()
   id: number;
 
   @IsString()
@@ -36,5 +36,6 @@ export class DoctorPutDTO {
   consulePrice: number;
 
   @IsNumber()
+  @IsOptional()
   specializationId: number;
 }

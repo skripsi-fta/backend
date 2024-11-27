@@ -26,6 +26,10 @@ export function sendResponse(res: Response, params: APIResponse) {
   return res.status(code).json(response);
 }
 
+export function sendImage(res: Response, type: string, image: Buffer) {
+  return res.status(StatusCodes.OK).set('Content-Type', type).send(image);
+}
+
 export class ResponseError extends Error {
   statusCode: StatusCodes;
 

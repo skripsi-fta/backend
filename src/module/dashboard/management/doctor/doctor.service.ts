@@ -7,6 +7,7 @@ import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import { Specialization } from 'src/database/entities/specialization.entity';
 import { LoggerService } from 'src/module/logger/logger.service';
+import { StorageService } from 'src/module/storage/storage.service';
 
 @Injectable()
 export class DoctorService {
@@ -16,6 +17,7 @@ export class DoctorService {
     private readonly doctorRepository: Repository<Doctor>,
     @InjectRepository(Specialization)
     private readonly specializationRepository: Repository<Specialization>,
+    private googleStorage: StorageService,
   ) {}
 
   async getDoctor(
@@ -42,6 +44,7 @@ export class DoctorService {
         consulePrice: true,
         rating: true,
         totalRating: true,
+        photoPath: true,
         specialization: { name: true, description: true, id: true },
       },
       relations: ['specialization'],
@@ -66,11 +69,19 @@ export class DoctorService {
         specializationName: doctor.specialization?.name,
         specializationDescription: doctor.specialization?.description,
         specializationId: doctor.specialization?.id,
+        photoPath: doctor.photoPath,
       })),
     };
   }
 
-  async addDoctor(data: DoctorPostDTO) {
+  async addDoctor(data: DoctorPostDTO, image: Express.Multer.File) {
+    let filePath = null;
+
+    if (image) {
+      filePath = await this.googleStorage.upload(image);
+      console.log(filePath);
+    }
+
     const specialization = await this.specializationRepository.findOne({
       where: { id: data.specializationId },
     });
@@ -84,6 +95,7 @@ export class DoctorService {
       profile: data.profile,
       consulePrice: data.consulePrice,
       specialization,
+      photoPath: filePath,
     });
 
     const result = await this.doctorRepository.save(doctor);
@@ -96,34 +108,62 @@ export class DoctorService {
     };
   }
 
-  async updateDoctor(req: DoctorPutDTO) {
-    const specialization = await this.specializationRepository.findOne({
-      where: { id: req.specializationId },
-    });
+  async updateDoctor(req: DoctorPutDTO, image: Express.Multer.File) {
+    try {
+      const doctor = await this.doctorRepository.findOneBy({ id: req.id });
 
-    if (!specialization) {
-      throw new ResponseError('Specialization not found', StatusCodes.CONFLICT);
+      if (!doctor) {
+        throw new ResponseError('Doctor not found', StatusCodes.NOT_FOUND);
+      }
+
+      let filePath = null;
+
+      if (image) {
+        if (
+          doctor.photoPath &&
+          (await this.googleStorage.get(doctor.photoPath))
+        ) {
+          await this.googleStorage.delete(doctor.photoPath);
+        }
+        filePath = await this.googleStorage.upload(image);
+      }
+
+      let specialization = null;
+      if (req.specializationId) {
+        specialization = await this.specializationRepository.findOne({
+          where: { id: req.specializationId },
+        });
+
+        if (!specialization) {
+          throw new ResponseError(
+            'Specialization not found',
+            StatusCodes.CONFLICT,
+          );
+        }
+      }
+
+      doctor.name = req.name;
+      doctor.profile = req.profile;
+      doctor.consulePrice = req.consulePrice;
+      doctor.specialization = specialization
+        ? specialization
+        : doctor.specialization;
+      doctor.photoPath = filePath ? filePath : doctor.photoPath;
+
+      const result = await this.doctorRepository.save(doctor);
+
+      return {
+        id: result.id,
+        name: result.name,
+        profile: result.profile,
+        consulePrice: result.consulePrice,
+      };
+    } catch (error) {
+      throw new ResponseError(
+        'Failed - Update Doctor',
+        StatusCodes.BAD_REQUEST,
+      );
     }
-
-    const doctor = await this.doctorRepository.findOneBy({ id: req.id });
-
-    if (!doctor) {
-      throw new ResponseError('Doctor not found', StatusCodes.NOT_FOUND);
-    }
-
-    doctor.name = req.name;
-    doctor.profile = req.profile;
-    doctor.consulePrice = req.consulePrice;
-    doctor.specialization = specialization;
-
-    const result = await this.doctorRepository.save(doctor);
-
-    return {
-      id: result.id,
-      name: result.name,
-      profile: result.profile,
-      consulePrice: result.consulePrice,
-    };
   }
 
   async deleteDoctor(id: number) {
