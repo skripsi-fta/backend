@@ -3,12 +3,16 @@ import {
   Controller,
   DefaultValuePipe,
   Delete,
+  FileTypeValidator,
   Get,
+  ParseFilePipe,
   Post,
   Put,
   Query,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { sendResponse } from 'src/utils/api.utils';
 import { Response } from 'express';
@@ -19,6 +23,7 @@ import { StaffRole } from 'src/database/entities/staff.entity';
 import { JwtAuthGuard } from '../../auth/guards/jwt.guards';
 import { RoleGuard } from '../../auth/guards/role.guards';
 import { Roles } from 'src/decorator/role.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('')
 @Roles(StaffRole.MANAGEMENT)
@@ -61,8 +66,21 @@ export class DoctorController {
   }
 
   @Post()
-  async postDoctor(@Res() res: Response, @Body() req: DoctorPostDTO) {
-    const data = await this.doctorService.addDoctor(req);
+  @UseInterceptors(FileInterceptor('image'))
+  async postDoctor(
+    @Res() res: Response,
+    @Body() req: DoctorPostDTO,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          // new MaxFileSizeValidator({ maxSize: 1000 }),
+          new FileTypeValidator({ fileType: 'image/jpeg' }),
+        ],
+      }),
+    )
+    image: Express.Multer.File,
+  ) {
+    const data = await this.doctorService.addDoctor(req, image);
 
     if (!data) {
       return sendResponse(res, {
@@ -79,8 +97,22 @@ export class DoctorController {
   }
 
   @Put()
-  async updateDoctor(@Res() res: Response, @Body() req: DoctorPutDTO) {
-    const data = await this.doctorService.updateDoctor(req);
+  @UseInterceptors(FileInterceptor('image'))
+  async updateDoctor(
+    @Res() res: Response,
+    @Body() req: DoctorPutDTO,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          // new MaxFileSizeValidator({ maxSize: 1000 }),
+          new FileTypeValidator({ fileType: 'image/jpeg' }),
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    image: Express.Multer.File,
+  ) {
+    const data = await this.doctorService.updateDoctor(req, image);
 
     if (!data) {
       return sendResponse(res, {

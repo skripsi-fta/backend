@@ -18,6 +18,7 @@ import { DashboardModule } from './module/dashboard/dashboard.module';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MobileModule } from './module/mobile/mobile.module';
+import { StorageModule } from './module/storage/storage.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { MobileModule } from './module/mobile/mobile.module';
     DashboardModule,
     MobileModule,
     ScheduleModule.forRoot(),
+    StorageModule,
   ],
   controllers: [AppController],
   providers: [Logger],

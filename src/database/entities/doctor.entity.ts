@@ -49,6 +49,12 @@ export class Doctor {
   })
   consulePrice: number;
 
+  @Column({
+    type: 'varchar',
+    nullable: true,
+  })
+  photoPath: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
