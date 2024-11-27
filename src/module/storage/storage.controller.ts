@@ -1,6 +1,8 @@
 import {
   Controller,
+  FileTypeValidator,
   Get,
+  ParseFilePipe,
   Post,
   Query,
   Res,
@@ -21,7 +23,15 @@ export class StorageController {
   @UseInterceptors(FileInterceptor('image'))
   async uploadImage(
     @Res() res: Response,
-    @UploadedFile() image: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          // new MaxFileSizeValidator({ maxSize: 1000 }),
+          new FileTypeValidator({ fileType: 'image/jpeg' }),
+        ],
+      }),
+    )
+    image: Express.Multer.File,
   ) {
     if (!image) {
       throw new ResponseError('No file provided!', StatusCodes.BAD_REQUEST);
