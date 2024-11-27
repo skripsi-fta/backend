@@ -9,8 +9,10 @@ export class StorageService {
   private bucket: string;
 
   constructor() {
+    const keyFileContent = JSON.parse(process.env.GCS_CREDENTIALS);
+
     this.storage = new Storage({
-      keyFilename: './key.json',
+      credentials: keyFileContent,
       projectId: process.env.PROJECT_ID,
     });
 
