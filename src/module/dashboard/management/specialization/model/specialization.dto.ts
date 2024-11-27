@@ -1,4 +1,9 @@
-import { IsNumber, IsString } from 'class-validator';
+import {
+  IsNumber,
+  IsNumberString,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class SpecializationPostDTO {
   @IsString()
@@ -14,12 +19,14 @@ export class SpecializationSwitchDTO {
 }
 
 export class SpecializationUpdateDTO {
-  @IsNumber()
+  @IsNumberString()
   id: number;
 
   @IsString()
+  @IsOptional()
   name: string;
 
   @IsString()
+  @IsOptional()
   description: string;
 }

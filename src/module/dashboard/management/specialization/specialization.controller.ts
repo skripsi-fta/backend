@@ -2,12 +2,16 @@ import {
   Body,
   Controller,
   DefaultValuePipe,
+  FileTypeValidator,
   Get,
+  ParseFilePipe,
   Post,
   Put,
   Query,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { SpecializationService } from './specialization.service';
 import { sendResponse } from 'src/utils/api.utils';
@@ -23,6 +27,7 @@ import { RoleGuard } from '../../auth/guards/role.guards';
 import { JwtAuthGuard } from '../../auth/guards/jwt.guards';
 import { Roles } from 'src/decorator/role.decorator';
 import { StaffRole } from 'src/database/entities/staff.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('')
 @Roles(StaffRole.MANAGEMENT)
@@ -61,11 +66,24 @@ export class SpecializationController {
   }
 
   @Post()
+  @UseInterceptors(FileInterceptor('image'))
   async addSpecialization(
     @Res() res: Response,
     @Body() req: SpecializationPostDTO,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          // new MaxFileSizeValidator({ maxSize: 1000 }),
+          new FileTypeValidator({ fileType: 'image/jpeg' }),
+        ],
+      }),
+    )
+    image: Express.Multer.File,
   ) {
-    const data = await this.specializationService.createSpecialization(req);
+    const data = await this.specializationService.createSpecialization(
+      req,
+      image,
+    );
 
     return sendResponse(res, {
       statusCode: StatusCodes.CREATED,
@@ -89,11 +107,25 @@ export class SpecializationController {
   }
 
   @Put()
+  @UseInterceptors(FileInterceptor('image'))
   async updateSpecialization(
     @Res() res: Response,
     @Body() body: SpecializationUpdateDTO,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          // new MaxFileSizeValidator({ maxSize: 1000 }),
+          new FileTypeValidator({ fileType: 'image/jpeg' }),
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    image: Express.Multer.File,
   ) {
-    const data = await this.specializationService.updateSpecialization(body);
+    const data = await this.specializationService.updateSpecialization(
+      body,
+      image,
+    );
 
     if (!data) {
       return sendResponse(res, {

@@ -10,6 +10,7 @@ import type {
   SpecializationUpdateDTO,
 } from './model/specialization.dto';
 import { LoggerService } from 'src/module/logger/logger.service';
+import { StorageService } from 'src/module/storage/storage.service';
 
 @Injectable()
 export class SpecializationService {
@@ -17,6 +18,7 @@ export class SpecializationService {
     private log: LoggerService,
     @InjectRepository(Specialization)
     private readonly specializationRepository: Repository<Specialization>,
+    private googleStorage: StorageService,
   ) {}
 
   async getSpecialization(
@@ -59,7 +61,12 @@ export class SpecializationService {
     };
   }
 
-  async createSpecialization(body: SpecializationPostDTO) {
+  async createSpecialization(
+    body: SpecializationPostDTO,
+    image: Express.Multer.File,
+  ) {
+    let filePath = null;
+
     const specializationExist = await this.specializationRepository.findOne({
       where: [{ name: body.name }],
     });
@@ -71,9 +78,14 @@ export class SpecializationService {
       );
     }
 
+    if (image) {
+      filePath = await this.googleStorage.upload(image);
+    }
+
     const data = this.specializationRepository.create({
       name: body.name,
       description: body.description,
+      photoPath: filePath,
     });
 
     const result = await this.specializationRepository.save(data);
@@ -100,13 +112,35 @@ export class SpecializationService {
     return result;
   }
 
-  async updateSpecialization(body: SpecializationUpdateDTO) {
+  async updateSpecialization(
+    body: SpecializationUpdateDTO,
+    image: Express.Multer.File,
+  ) {
+    let filePath = null;
     const specialization = await this.specializationRepository.findOneBy({
       id: body.id,
     });
 
+    if (!specialization) {
+      throw new ResponseError(
+        'Failed - Specialization not found',
+        StatusCodes.NOT_FOUND,
+      );
+    }
+
+    if (image) {
+      if (
+        specialization.photoPath &&
+        (await this.googleStorage.get(specialization.photoPath))
+      ) {
+        await this.googleStorage.delete(specialization.photoPath);
+      }
+      filePath = await this.googleStorage.upload(image);
+    }
+
     specialization.name = body.name;
     specialization.description = body.description;
+    specialization.photoPath = filePath ? filePath : specialization.photoPath;
 
     const result = await this.specializationRepository.save(specialization);
 

@@ -15,6 +15,12 @@ export class Specialization {
   @Column({ default: true })
   isActive: boolean;
 
+  @Column({
+    type: 'varchar',
+    nullable: true,
+  })
+  photoPath: string;
+
   @OneToMany(() => Staff, (staff) => staff.specialization, { nullable: true })
   staffs: Staff[];
 }
