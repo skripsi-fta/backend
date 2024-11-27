@@ -4,6 +4,7 @@ import { RouterModule } from '@nestjs/core';
 import { JanjiTemuModule } from './janjitemu/janjitemu.module';
 import { PatientModule } from './patient/patient.module';
 import { SpecializationModule } from './specialization/specialization.module';
+import { DoctorModule } from './doctor/doctor.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { SpecializationModule } from './specialization/specialization.module';
     JanjiTemuModule,
     PatientModule,
     SpecializationModule,
+    DoctorModule,
     RouterModule.register([
       {
         path: 'mobile/auth',
@@ -25,6 +27,7 @@ import { SpecializationModule } from './specialization/specialization.module';
         module: PatientModule,
       },
       { path: 'mobile/specialization', module: SpecializationModule },
+      { path: 'mobile/doctor', module: DoctorModule },
     ]),
   ],
 })
