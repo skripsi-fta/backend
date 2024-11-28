@@ -21,4 +21,20 @@ export class DoctorController {
       data,
     });
   }
+
+  @Get('')
+  async getDoctor(
+    @Res() res: Response,
+    @Query('name') name: string,
+    @Query('pageSize', new DefaultValuePipe(10)) pageSize: number,
+    @Query('pageNumber', new DefaultValuePipe(1)) pageNumber: number,
+  ) {
+    const data = await this.doctorService.getDoctor(name, pageSize, pageNumber);
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      message: 'Success - Get Doctor Recommendation',
+      data,
+    });
+  }
 }
