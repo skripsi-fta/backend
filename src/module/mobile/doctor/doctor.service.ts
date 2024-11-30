@@ -23,12 +23,14 @@ export class DoctorService {
                 d.total_rating as "totalRating",
                 d.consule_price as "consulePrice",
                 d.photo_path as "photoPath",
-                CAST(COUNT(DISTINCT s.id) as INTEGER) as "totalPasien",
+                cast(SUM(CASE WHEN a.appointment_status = 'done' THEN 1 ELSE 0 END) as INTEGER) as "totalPasien",
                 s2."name" as "namaSpesialisasi"
             FROM
                 doctor d
             LEFT JOIN schedule s ON
                 s.doctor_id = d.id
+            LEFT JOIN appointment a ON
+                a.schedule_id = s.id
             LEFT JOIN specialization s2 ON
                 d.specialization_id = s2.id
             ${name ? `WHERE LOWER(d."name") LIKE $1` : ''}
