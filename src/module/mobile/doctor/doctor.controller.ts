@@ -8,20 +8,6 @@ import { Response } from 'express';
 export class DoctorController {
   constructor(private doctorService: DoctorService) {}
 
-  @Get('recommendation')
-  async getRecommendation(
-    @Res() res: Response,
-    @Query('total', new DefaultValuePipe(3)) total: number,
-  ) {
-    const data = await this.doctorService.getRecommendation(total);
-
-    return sendResponse(res, {
-      statusCode: StatusCodes.OK,
-      message: 'Success - Get Doctor Recommendation',
-      data,
-    });
-  }
-
   @Get('')
   async getDoctor(
     @Res() res: Response,
