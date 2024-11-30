@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Specialization } from 'src/database/entities/specialization.entity';
-import type { Repository } from 'typeorm';
+import { ILike, type Repository } from 'typeorm';
 
 @Injectable()
 export class SpecializationService {
@@ -10,12 +10,23 @@ export class SpecializationService {
     private readonly specializationRepository: Repository<Specialization>,
   ) {}
 
-  async getRecommendation(total: number) {
-    const specialization = await this.specializationRepository.find({
-      where: { isActive: true },
-      take: total,
+  async getSpecialization(name: string, pageSize: number, pageNumber: number) {
+    const [data, count] = await this.specializationRepository.findAndCount({
+      skip: (pageNumber - 1) * pageSize,
+      take: pageSize,
+      order: {
+        id: 'ASC',
+      },
+      where: {
+        name: name ? ILike(`%${name}%`) : undefined,
+      },
     });
 
-    return specialization;
+    return {
+      data,
+      currentPage: Number(pageNumber),
+      totalPages: Number(Math.ceil((count || 0) / pageSize)),
+      totalRows: Number(count || 0),
+    };
   }
 }

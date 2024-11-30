@@ -11,45 +11,6 @@ export class DoctorService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async getRecommendation(total: number) {
-    const data = await this.dataSource.query(
-      `
-        SELECT
-            d.id,
-            d."name",
-            d.profile,
-            d.rating,
-            d.total_rating as "totalRating",
-            d.consule_price as "consulePrice",
-            d.photo_path as "photoPath",
-            CAST(COUNT(s.id) as INTEGER) as "totalPasien",
-            s2."name" as "namaSpesialisasi"
-        FROM
-            doctor d
-        LEFT JOIN schedule s ON
-            s.doctor_id = d.id
-        LEFT JOIN appointment a ON
-            a.schedule_id = s.id
-        LEFT JOIN specialization s2 ON
-            d.specialization_id = s2.id
-        GROUP BY
-            d.id,
-            d."name",
-            d.profile,
-            d.rating,
-            d.total_rating,
-            d.consule_price,
-            d.photo_path,
-            s2."name"
-        ORDER BY d.rating DESC, "totalPasien" DESC
-        LIMIT $1
-        `,
-      [total],
-    );
-
-    return data;
-  }
-
   async getDoctor(name: string, pageSize: number, pageNumber: number) {
     const data = await this.dataSource.query(
       `
@@ -90,8 +51,7 @@ export class DoctorService {
             total_count.total
         FROM
             doctor_data, total_count
-        ORDER BY
-            doctor_data.id
+        ORDER BY doctor_data."rating" DESC, doctor_data."totalPasien" DESC
         LIMIT $${name ? 2 : 1} OFFSET $${name ? 3 : 2}
         `,
       name
