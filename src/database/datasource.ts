@@ -42,7 +42,6 @@ const dataSource = (configService: ConfigService) => ({
   subscribers: [],
   migrations: [],
   synchronize: true,
-  //   logging: true,
   namingStrategy: new SnakeNamingStrategy(),
 });
 
