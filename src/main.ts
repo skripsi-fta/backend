@@ -17,6 +17,7 @@ async function bootstrap() {
   const isDev = configService.get<boolean>('isDev');
 
   app.use(helmet());
+  app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
   app.enableCors();
 
   app.useGlobalPipes(

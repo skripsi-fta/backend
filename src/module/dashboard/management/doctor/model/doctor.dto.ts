@@ -1,9 +1,4 @@
-import {
-  IsNumber,
-  IsNumberString,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsNumberString, IsOptional, IsString } from 'class-validator';
 
 export class DoctorPostDTO {
   @IsString()
@@ -35,7 +30,7 @@ export class DoctorPutDTO {
   @IsOptional()
   consulePrice: number;
 
-  @IsNumber()
+  @IsNumberString()
   @IsOptional()
   specializationId: number;
 }

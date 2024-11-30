@@ -3,13 +3,11 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Doctor } from './doctor.entity';
-import { Specialization } from './specialization.entity';
 
 export enum StaffRole {
   DOCTOR = 'DOCTOR',
@@ -61,9 +59,4 @@ export class Staff {
   @OneToOne(() => Doctor, (doctor) => doctor.id, { nullable: true })
   @JoinColumn()
   doctor: Doctor;
-
-  @ManyToOne(() => Specialization, (specialization) => specialization.staffs, {
-    nullable: true,
-  })
-  specialization: Specialization;
 }

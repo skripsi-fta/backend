@@ -74,7 +74,7 @@ export class SpecializationController {
       new ParseFilePipe({
         validators: [
           // new MaxFileSizeValidator({ maxSize: 1000 }),
-          new FileTypeValidator({ fileType: 'image/jpeg' }),
+          new FileTypeValidator({ fileType: 'image/*' }),
         ],
       }),
     )
@@ -115,7 +115,7 @@ export class SpecializationController {
       new ParseFilePipe({
         validators: [
           // new MaxFileSizeValidator({ maxSize: 1000 }),
-          new FileTypeValidator({ fileType: 'image/jpeg' }),
+          new FileTypeValidator({ fileType: 'image/*' }),
         ],
         fileIsRequired: false,
       }),
