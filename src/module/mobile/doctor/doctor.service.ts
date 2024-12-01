@@ -11,7 +11,26 @@ export class DoctorService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async getDoctor(name: string, pageSize: number, pageNumber: number) {
+  async getDoctor(
+    name: string,
+    pageSize: number,
+    pageNumber: number,
+    spesialisasiId: number,
+  ) {
+    let whereQuery = ' WHERE 1=1 ';
+
+    const whereParams: any[] = [];
+
+    if (name) {
+      whereQuery += ` AND WHERE LOWER(d."name") LIKE $${whereParams.length + 1}`;
+      whereParams.push(name);
+    }
+
+    if (spesialisasiId) {
+      whereQuery += ` AND s2.id = $${whereParams.length + 1}`;
+      whereParams.push(spesialisasiId);
+    }
+
     const data = await this.dataSource.query(
       `
         WITH doctor_data AS (
@@ -33,7 +52,7 @@ export class DoctorService {
                 a.schedule_id = s.id
             LEFT JOIN specialization s2 ON
                 d.specialization_id = s2.id
-            ${name ? `WHERE LOWER(d."name") LIKE $1` : ''}
+            ${whereQuery}
             GROUP BY
                 d.id,
                 d."name",
@@ -54,11 +73,9 @@ export class DoctorService {
         FROM
             doctor_data, total_count
         ORDER BY doctor_data."rating" DESC, doctor_data."totalPasien" DESC
-        LIMIT $${name ? 2 : 1} OFFSET $${name ? 3 : 2}
+        LIMIT $${whereParams.length + 1} OFFSET $${whereParams.length + 2}
         `,
-      name
-        ? [`%${name.toLowerCase()}%`, pageSize, (pageNumber - 1) * pageSize]
-        : [pageSize, (pageNumber - 1) * pageSize],
+      [...whereParams, pageSize, (pageNumber - 1) * pageSize],
     );
 
     return {

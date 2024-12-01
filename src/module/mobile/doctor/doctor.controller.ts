@@ -14,8 +14,14 @@ export class DoctorController {
     @Query('name') name: string,
     @Query('pageSize', new DefaultValuePipe(10)) pageSize: number,
     @Query('pageNumber', new DefaultValuePipe(1)) pageNumber: number,
+    @Query('spesialisasiId') spesialisasiId: number,
   ) {
-    const data = await this.doctorService.getDoctor(name, pageSize, pageNumber);
+    const data = await this.doctorService.getDoctor(
+      name,
+      pageSize,
+      pageNumber,
+      spesialisasiId,
+    );
 
     return sendResponse(res, {
       statusCode: StatusCodes.OK,
