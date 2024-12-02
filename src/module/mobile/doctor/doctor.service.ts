@@ -222,7 +222,7 @@ export class DoctorService {
         LEFT JOIN room r ON r.id = s.room_id
         WHERE s.doctor_id = $1 AND s.date BETWEEN $2 AND $3 AND s.status = 'ready'
         GROUP BY s.id, r.name
-        ORDER BY s.date
+        ORDER BY s.date, s.start_time
         `,
       [doctorId, firstDay, secondDay],
     )) as Array<{
