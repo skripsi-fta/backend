@@ -22,12 +22,16 @@ import {
   MedicalRecordPostDTO,
   MedicalRecordPutDTO,
 } from './model/medicalrecord.dto';
+import { LiveQueueGateaway } from 'src/module/livequeue/livequeuegateaway';
 
 @Controller('')
 @Roles(StaffRole.MANAGEMENT)
 @UseGuards(JwtAuthGuard, RoleGuard)
 export class MedicalrecordController {
-  constructor(private medicalrecordService: MedicalrecordService) {}
+  constructor(
+    private medicalrecordService: MedicalrecordService,
+    private liveQueueGateaway: LiveQueueGateaway,
+  ) {}
 
   @Get()
   async getMedicalRecord(
@@ -60,6 +64,8 @@ export class MedicalrecordController {
     @Body() req: MedicalRecordPostDTO,
   ) {
     const data = await this.medicalrecordService.addMedicalRecord(req);
+
+    this.liveQueueGateaway.sendQueueData('queue', 'doctor');
 
     return sendResponse(res, {
       statusCode: StatusCodes.CREATED,

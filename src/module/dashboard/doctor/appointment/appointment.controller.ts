@@ -20,6 +20,7 @@ import { Request, Response } from 'express';
 import { sendResponse } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import type { CheckAppointmentDTO } from './model/appointment.dto';
+import { LiveQueueGateaway } from 'src/module/livequeue/livequeuegateaway';
 
 @Controller('')
 @Roles(StaffRole.MANAGEMENT, StaffRole.DOCTOR)
@@ -28,6 +29,7 @@ export class AppointmentDoctorController {
   constructor(
     private log: LoggerService,
     private appointmentService: AppointmentDoctorService,
+    private liveQueueGateaway: LiveQueueGateaway,
   ) {}
 
   @Get('')
@@ -75,6 +77,8 @@ export class AppointmentDoctorController {
     @Body() body: CheckAppointmentDTO,
   ) {
     const data = await this.appointmentService.checkAppointment(body);
+
+    this.liveQueueGateaway.sendQueueData('queue', 'pharmacy');
 
     return sendResponse(res, {
       statusCode: StatusCodes.OK,
