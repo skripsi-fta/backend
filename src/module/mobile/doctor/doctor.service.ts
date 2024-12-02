@@ -45,7 +45,7 @@ export class DoctorService {
                 d.total_rating as "totalRating",
                 d.consule_price as "consulePrice",
                 d.photo_path as "photoPath",
-                cast(SUM(CASE WHEN a.appointment_status = 'done' THEN 1 ELSE 0 END) as INTEGER) as "totalPasien",
+                CAST(SUM(CASE WHEN a.appointment_status = 'done' THEN 1 ELSE 0 END) as INTEGER) as "totalPasien",
                 s2."name" as "namaSpesialisasi"
             FROM
                 doctor d
@@ -138,8 +138,8 @@ export class DoctorService {
         SELECT
             fs.id,
             fs.day,
-            fs.start_time as "startTime",
-            fs.end_time as "endTime",
+            TO_CHAR(fs.start_time, 'HH24:MI') as "startTime",
+            TO_CHAR(fs.end_time, 'HH24:MI') as "endTime",
             fs.capacity
         FROM
             fixed_schedule fs
@@ -188,8 +188,12 @@ export class DoctorService {
     };
   }
 
-  async getDoctorSchedule(doctorId: number, monthNumber: number) {
-    const date = dayjs().month(monthNumber);
+  async getDoctorSchedule(
+    doctorId: number,
+    monthNumber: number,
+    yearNumber: number,
+  ) {
+    const date = dayjs().month(monthNumber).year(yearNumber);
 
     const firstDay = date.startOf('month').format('YYYY-MM-DD');
 
@@ -204,17 +208,20 @@ export class DoctorService {
             TO_CHAR(s.start_time, 'HH24:MI') as "startTime",
             TO_CHAR(s.end_time, 'HH24:MI') as "endTime",
             s."type",
-            CAST(COUNT(a.id) as INTEGER) as "totalPasien",
+            CAST(SUM(CASE WHEN a.appointment_status != 'cancel' THEN 1 ELSE 0 END) as INTEGER) as "totalPasien",
             CASE
+                WHEN NOW() > (s.date + s.start_time::time) THEN 'Tidak Tersedia'
                 WHEN CAST(COUNT(a.id) AS INTEGER) > (s.capacity * 0.7) THEN 'Hampir Penuh'
                 WHEN CAST(COUNT(a.id) as INTEGER) = s.capacity THEN 'Tidak Tersedia'
                 ELSE 'Tersedia'
-                END AS "status"
+                END AS "status",
+            r.name as "namaRuangan"
         FROM
             schedule s
         LEFT JOIN appointment a ON a.schedule_id = s.id
-        WHERE s.doctor_id = $1 AND s.date BETWEEN $2 AND $3 AND s.status = 'ready' AND a.appointment_status != 'cancel'
-        GROUP BY s.id
+        LEFT JOIN room r ON r.id = s.room_id
+        WHERE s.doctor_id = $1 AND s.date BETWEEN $2 AND $3 AND s.status = 'ready'
+        GROUP BY s.id, r.name
         ORDER BY s.date
         `,
       [doctorId, firstDay, secondDay],
@@ -229,6 +236,66 @@ export class DoctorService {
       totalPasien: number;
     }>;
 
-    return data;
+    const colorMap = {
+      'Hampir Penuh': '#FF872E',
+      'Tidak Tersedia': '#FF1F00',
+      Tersedia: '#000000',
+    };
+
+    let dateData: {
+      [key: string]: {
+        data: {
+          id: number;
+          date: string;
+          capacity: number;
+          status: string;
+          startTime: string;
+          endTime: string;
+          type: string;
+          totalPasien: number;
+        }[];
+        dots: {
+          key: string;
+          color: string;
+          selectedDotColor: string;
+        }[];
+      };
+    } = {};
+
+    data.forEach((d, i) => {
+      if (dateData[d.date]) {
+        dateData = {
+          ...dateData,
+          [d.date]: {
+            ...dateData[d.date],
+            data: [...dateData[d.date].data, { ...d }],
+            dots: [
+              ...dateData[d.date].dots,
+              {
+                key: i.toString(),
+                color: colorMap[d.status] ?? '',
+                selectedDotColor: colorMap[d.status] ?? '',
+              },
+            ],
+          },
+        };
+      } else {
+        dateData = {
+          ...dateData,
+          [d.date]: {
+            data: [{ ...d }],
+            dots: [
+              {
+                key: i.toString(),
+                color: colorMap[d.status] ?? '',
+                selectedDotColor: colorMap[d.status] ?? '',
+              },
+            ],
+          },
+        };
+      }
+    });
+
+    return dateData;
   }
 }

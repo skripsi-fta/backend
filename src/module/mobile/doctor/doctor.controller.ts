@@ -53,14 +53,16 @@ export class DoctorController {
     @Res() res: Response,
     @Query('doctorId') doctorId: number,
     @Query('monthNumber') monthNumber: number,
+    @Query('yearNumber') yearNumber: number,
   ) {
-    if (!doctorId || !monthNumber) {
+    if (!doctorId || !monthNumber || !yearNumber) {
       throw new ResponseError('Invalid Field Format', StatusCodes.BAD_REQUEST);
     }
 
     const data = await this.doctorService.getDoctorSchedule(
       doctorId,
       monthNumber,
+      yearNumber,
     );
 
     return sendResponse(res, {
