@@ -47,4 +47,26 @@ export class DoctorController {
       data,
     });
   }
+
+  @Get('schedule')
+  async getDoctorSchedule(
+    @Res() res: Response,
+    @Query('doctorId') doctorId: number,
+    @Query('monthNumber') monthNumber: number,
+  ) {
+    if (!doctorId || !monthNumber) {
+      throw new ResponseError('Invalid Field Format', StatusCodes.BAD_REQUEST);
+    }
+
+    const data = await this.doctorService.getDoctorSchedule(
+      doctorId,
+      monthNumber,
+    );
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      message: 'Success - Get Doctor Schedule',
+      data,
+    });
+  }
 }

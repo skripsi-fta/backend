@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as dayjs from 'dayjs';
 import { StatusCodes } from 'http-status-codes';
 import { Doctor } from 'src/database/entities/doctor.entity';
 import { ResponseError } from 'src/utils/api.utils';
@@ -185,5 +186,49 @@ export class DoctorService {
       doctorData,
       scheduleData: days,
     };
+  }
+
+  async getDoctorSchedule(doctorId: number, monthNumber: number) {
+    const date = dayjs().month(monthNumber);
+
+    const firstDay = date.startOf('month').format('YYYY-MM-DD');
+
+    const secondDay = date.endOf('month').format('YYYY-MM-DD');
+
+    const data = (await this.dataSource.query(
+      `
+        SELECT
+            s.id,
+            TO_CHAR(s.date, 'YYYY-MM-DD') as "date",
+            s.capacity,
+            TO_CHAR(s.start_time, 'HH24:MI') as "startTime",
+            TO_CHAR(s.end_time, 'HH24:MI') as "endTime",
+            s."type",
+            CAST(COUNT(a.id) as INTEGER) as "totalPasien",
+            CASE
+                WHEN CAST(COUNT(a.id) AS INTEGER) > (s.capacity * 0.7) THEN 'Hampir Penuh'
+                WHEN CAST(COUNT(a.id) as INTEGER) = s.capacity THEN 'Tidak Tersedia'
+                ELSE 'Tersedia'
+                END AS "status"
+        FROM
+            schedule s
+        LEFT JOIN appointment a ON a.schedule_id = s.id
+        WHERE s.doctor_id = $1 AND s.date BETWEEN $2 AND $3 AND s.status = 'ready' AND a.appointment_status != 'cancel'
+        GROUP BY s.id
+        ORDER BY s.date
+        `,
+      [doctorId, firstDay, secondDay],
+    )) as Array<{
+      id: number;
+      date: string;
+      capacity: number;
+      status: string;
+      startTime: string;
+      endTime: string;
+      type: string;
+      totalPasien: number;
+    }>;
+
+    return data;
   }
 }
