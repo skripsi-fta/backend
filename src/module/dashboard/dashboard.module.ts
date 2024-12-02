@@ -15,6 +15,7 @@ import { ScheduleDoctorModule } from './doctor/schedule/schedule.module';
 import { AppointmentDoctorModule } from './doctor/appointment/appointment.module';
 import { PharmacyModule } from './pharmacy/pharmacy.module';
 import { CashierModule } from './cashier/cashier.module';
+import { LivequeueModule } from '../livequeue/livequeue.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { CashierModule } from './cashier/cashier.module';
     DoctorModule,
     PharmacyModule,
     CashierModule,
+    LivequeueModule,
     RouterModule.register([
       {
         path: 'dashboard/auth',

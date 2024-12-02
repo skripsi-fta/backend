@@ -19,6 +19,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MobileModule } from './module/mobile/mobile.module';
 import { StorageModule } from './module/storage/storage.module';
+import { LivequeueModule } from './module/livequeue/livequeue.module';
 import { InitDatabaseModule } from './database/init/init.module';
 
 @Module({
@@ -40,6 +41,7 @@ import { InitDatabaseModule } from './database/init/init.module';
     MobileModule,
     ScheduleModule.forRoot(),
     StorageModule,
+    LivequeueModule,
     InitDatabaseModule,
   ],
   controllers: [AppController],

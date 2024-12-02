@@ -18,6 +18,7 @@ import { Response } from 'express';
 import { sendResponse } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import { PharmacyUpdateDTO } from './model/pharmacy.dto';
+import { LiveQueueGateaway } from 'src/module/livequeue/livequeuegateaway';
 
 @Controller('')
 @Roles(StaffRole.MANAGEMENT, StaffRole.PHARMACIST)
@@ -26,6 +27,7 @@ export class PharmacyController {
   constructor(
     private log: LoggerService,
     private pharmacyService: PharmacyService,
+    private liveQueueGateaway: LiveQueueGateaway,
   ) {}
 
   @Get()
@@ -63,6 +65,8 @@ export class PharmacyController {
   @Post()
   async updateQueue(@Res() res: Response, @Body() body: PharmacyUpdateDTO) {
     const data = await this.pharmacyService.updatePharmacyQueue(body);
+
+    this.liveQueueGateaway.sendQueueData('queue', 'cashier');
 
     return sendResponse(res, {
       statusCode: StatusCodes.OK,

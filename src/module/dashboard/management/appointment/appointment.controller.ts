@@ -18,11 +18,15 @@ import { AppointmentStatus } from 'src/database/entities/appointment.entitity';
 import { JwtAuthGuard } from '../../auth/guards/jwt.guards';
 import { Roles } from 'src/decorator/role.decorator';
 import { StaffRole } from 'src/database/entities/staff.entity';
+import { LiveQueueGateaway } from 'src/module/livequeue/livequeuegateaway';
 
 @Controller('')
 @UseGuards(JwtAuthGuard)
 export class AppointmentController {
-  constructor(private appointmentService: AppointmentService) {}
+  constructor(
+    private appointmentService: AppointmentService,
+    private liveQueueGateaway: LiveQueueGateaway,
+  ) {}
 
   @Get()
   async getAppointment(
@@ -94,6 +98,8 @@ export class AppointmentController {
       req.bookingCode,
       AppointmentStatus.CHECKIN,
     );
+
+    this.liveQueueGateaway.sendQueueData('queue', 'global');
 
     return sendResponse(res, {
       statusCode: StatusCodes.OK,
