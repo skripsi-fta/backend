@@ -8,16 +8,22 @@ import { sendResponse } from 'src/utils/api.utils';
 export class SpecializationController {
   constructor(private specializationService: SpecializationService) {}
 
-  @Get('recommendation')
-  async getRecommendation(
+  @Get('')
+  async getSpesialisasi(
     @Res() res: Response,
-    @Query('total', new DefaultValuePipe(5)) total: number,
+    @Query('name') name: string,
+    @Query('pageSize', new DefaultValuePipe(10)) pageSize: number,
+    @Query('pageNumber', new DefaultValuePipe(1)) pageNumber: number,
   ) {
-    const data = await this.specializationService.getRecommendation(total);
+    const data = await this.specializationService.getSpecialization(
+      name,
+      pageSize,
+      pageNumber,
+    );
 
     return sendResponse(res, {
       statusCode: StatusCodes.OK,
-      message: 'Success - Get Specialization Recommendation',
+      message: 'Success - Get Specialization',
       data,
     });
   }

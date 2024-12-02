@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Staff } from './staff.entity';
+import { Doctor } from './doctor.entity';
 
 @Entity()
 export class Specialization {
@@ -21,6 +21,8 @@ export class Specialization {
   })
   photoPath: string;
 
-  @OneToMany(() => Staff, (staff) => staff.specialization, { nullable: true })
-  staffs: Staff[];
+  @OneToMany(() => Doctor, (Doctor) => Doctor.specialization, {
+    nullable: true,
+  })
+  doctors: Doctor[];
 }

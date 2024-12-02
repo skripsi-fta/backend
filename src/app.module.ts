@@ -20,6 +20,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { MobileModule } from './module/mobile/mobile.module';
 import { StorageModule } from './module/storage/storage.module';
 import { LivequeueModule } from './module/livequeue/livequeue.module';
+import { InitDatabaseModule } from './database/init/init.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { LivequeueModule } from './module/livequeue/livequeue.module';
     ScheduleModule.forRoot(),
     StorageModule,
     LivequeueModule,
+    InitDatabaseModule,
   ],
   controllers: [AppController],
   providers: [Logger],

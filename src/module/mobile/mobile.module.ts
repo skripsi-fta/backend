@@ -5,6 +5,7 @@ import { JanjiTemuModule } from './janjitemu/janjitemu.module';
 import { PatientModule } from './patient/patient.module';
 import { SpecializationModule } from './specialization/specialization.module';
 import { DoctorModule } from './doctor/doctor.module';
+import { ScheduleModule } from './schedule/schedule.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { DoctorModule } from './doctor/doctor.module';
     PatientModule,
     SpecializationModule,
     DoctorModule,
+    ScheduleModule,
     RouterModule.register([
       {
         path: 'mobile/auth',
@@ -28,6 +30,7 @@ import { DoctorModule } from './doctor/doctor.module';
       },
       { path: 'mobile/specialization', module: SpecializationModule },
       { path: 'mobile/doctor', module: DoctorModule },
+      { path: 'mobile/schedule', module: ScheduleModule },
     ]),
   ],
 })

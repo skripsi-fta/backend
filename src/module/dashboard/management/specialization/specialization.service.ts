@@ -33,10 +33,13 @@ export class SpecializationService {
         id: true,
         name: true,
         description: true,
-        staffs: true,
+        doctors: true,
         isActive: true,
+        photoPath: true,
       },
-      relations: ['staffs'],
+      relations: {
+        doctors: true,
+      },
       skip: (pageNumber - 1) * pageSize,
       take: pageSize,
       order: {
@@ -55,8 +58,9 @@ export class SpecializationService {
         id: d.id,
         name: d.name,
         description: d.description,
-        doctorCount: d.staffs?.length ?? 0,
+        doctorCount: d.doctors?.length ?? 0,
         isActive: d.isActive,
+        photoPath: d.photoPath,
       })),
     };
   }

@@ -41,10 +41,12 @@ export class StorageService {
   }
 
   async delete(path: string) {
-    await this.storage
-      .bucket(this.bucket)
-      .file(path)
-      .delete({ ignoreNotFound: true });
+    try {
+      await this.storage
+        .bucket(this.bucket)
+        .file(path)
+        .delete({ ignoreNotFound: true });
+    } catch (e) {}
   }
 
   async get(path: string): Promise<Buffer> {
@@ -57,7 +59,7 @@ export class StorageService {
       const [buffer] = fileResponse;
       return buffer;
     } catch (error) {
-      throw new ResponseError('Images not found', StatusCodes.NOT_FOUND);
+      return null;
     }
   }
 }
