@@ -1,6 +1,6 @@
 import { Controller, DefaultValuePipe, Get, Query, Res } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
-import { sendResponse } from 'src/utils/api.utils';
+import { ResponseError, sendResponse } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import { Response } from 'express';
 
@@ -26,6 +26,24 @@ export class DoctorController {
     return sendResponse(res, {
       statusCode: StatusCodes.OK,
       message: 'Success - Get Doctor Recommendation',
+      data,
+    });
+  }
+
+  @Get('detail')
+  async getDoctorDetail(
+    @Res() res: Response,
+    @Query('doctorId') doctorId: number,
+  ) {
+    if (!doctorId) {
+      throw new ResponseError('Invalid Field Format', StatusCodes.BAD_REQUEST);
+    }
+
+    const data = await this.doctorService.getDoctorDetail(doctorId);
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      message: 'Success - Get Doctor Detail',
       data,
     });
   }
