@@ -41,6 +41,7 @@ export class ScheduleService {
                 TO_CHAR(s.end_time, 'HH24:MI') as "endTime",
                 s."type",
                 CAST(COUNT(a.id) as INTEGER) as "totalPasien",
+                d.id as "doctorId",
                 d."name" as "doctorName",
                 d.rating as "rating",
                 d.total_rating as "totalRating",
