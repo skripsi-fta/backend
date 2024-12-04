@@ -295,9 +295,6 @@ export class AppointmentService {
           globalQueue: 'DESC',
         },
         where: {
-          schedule: {
-            id: appointment.schedule.id,
-          },
           appointmentStatus: Not(AppointmentStatus.SCHEDULED),
         },
       });
