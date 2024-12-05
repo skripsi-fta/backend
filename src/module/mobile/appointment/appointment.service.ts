@@ -108,4 +108,104 @@ export class AppointmentService {
 
     return result;
   }
+
+  async getListAppointment({
+    pageNumber,
+    pageSize,
+    type,
+    user,
+  }: {
+    pageSize: number;
+    pageNumber: number;
+    type: string;
+    user: UserDTO;
+  }) {
+    const userPatientData = await this.authRepository.findOne({
+      where: {
+        id: user.id,
+      },
+      relations: {
+        patient: true,
+      },
+    });
+
+    if (!userPatientData.patient) {
+      throw new ResponseError(
+        'Data pasien tidak ditemukan',
+        StatusCodes.NOT_FOUND,
+      );
+    }
+
+    let whereQuery = ' WHERE 1=1 ';
+
+    const whereParams: any[] = [];
+
+    whereQuery += ` AND a.patient_id = $${whereParams.length + 1}`;
+    whereParams.push(userPatientData.patient.id);
+
+    if (type === 'mendatang') {
+      whereQuery += ` AND NOW() < (s.date + s.end_time::time)`;
+    }
+
+    if (type === 'lalu') {
+      whereQuery += ` AND NOW() > (s.date + s.end_time::time)`;
+    }
+
+    const data = await this.dataSource.query(
+      `
+        WITH appointment_data AS (
+            SELECT
+                a.id,
+                s.id as "scheduleId",
+                s.date,
+                s.capacity,
+                s.status,
+                TO_CHAR(s.start_time, 'HH24:MI') as "startTime",
+                TO_CHAR(s.end_time, 'HH24:MI') as "endTime",
+                s."type",
+                d.id as "doctorId",
+                d."name" as "doctorName",
+                d.rating as "rating",
+                d.total_rating as "totalRating",
+                d.consule_price as "consulePrice",
+                d.photo_path as "photoPathDoctor",
+                s2."name" as "spesialisasiName"
+            FROM
+                appointment a
+            LEFT JOIN schedule s ON s.id = a.schedule_id
+            LEFT JOIN doctor d ON d.id = s.doctor_id
+            LEFT JOIN specialization s2 ON s2.id = d.id
+            ${whereQuery}
+            ORDER BY s."date" ASC, s.start_time ASC
+        ),
+        total_count AS (
+            SELECT
+                COUNT(*) as total
+            FROM
+                appointment_data
+        )
+        SELECT
+            appointment_data.*,
+            total_count.total
+        FROM
+            appointment_data, total_count
+        LIMIT $${whereParams.length + 1} OFFSET $${whereParams.length + 2}
+      `,
+      [
+        ...whereParams,
+        Number(pageSize),
+        (Number(pageNumber) - 1) * Number(pageSize),
+      ],
+    );
+
+    return {
+      data: data.map((item) => ({
+        ...item,
+        total: undefined,
+      })),
+      currentPage: Number(pageNumber),
+      totalPages: Number(Math.ceil((data[0]?.total || 0) / pageSize)),
+      totalRows: Number(data[0]?.total || 0),
+    };
+  }
 }
