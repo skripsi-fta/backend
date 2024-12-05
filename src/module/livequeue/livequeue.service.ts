@@ -19,17 +19,21 @@ export class LivequeueService {
     const currDate = DateTime.now();
     const dateNow = currDate.toFormat(loggerDateFormat);
 
-    const data = await this.dataSource.query(
-      `select pq.queue_number as queueNumber, p."name" as patientName
+    const data = (await this.dataSource.query(
+      `select pq.queue_number as "queueNumber", p."name" as "patientName"
           from appointment a 
           join pharmacy_queue pq on a.pharmacy_queue_id = pq.id 
           join patient p on a.patient_id = p.id 
           join schedule s on a.schedule_id = s.id 
           where a.appointment_status = 'pharmacy queue' and s."date" = '${dateNow}'
           order by pq.queue_number limit 1`,
-    );
+    )) as Array<unknown>;
 
-    return data;
+    if (data.length === 0) {
+      return null;
+    }
+
+    return data[0];
   }
 
   async getLiveCashierQueue() {
@@ -37,16 +41,20 @@ export class LivequeueService {
     const currDate = DateTime.now();
     const dateNow = currDate.toFormat(loggerDateFormat);
 
-    const data = await this.dataSource.query(
-      `select cq.queue_number as queueNumber, p."name" as patientName
+    const data = (await this.dataSource.query(
+      `select cq.queue_number as "queueNumber", p."name" as "patientName"
         from appointment a 
         join cashier_queue cq on a.cashier_queue_id = cq.id 
         join patient p on a.patient_id = p.id 
         join schedule s on a.schedule_id = s.id 
         where a.appointment_status = 'cashier queue' and s."date" = '${dateNow}'
         order by cq.queue_number limit 1`,
-    );
+    )) as Array<unknown>;
 
-    return data;
+    if (data.length === 0) {
+      return null;
+    }
+
+    return data[0];
   }
 }

@@ -10,6 +10,7 @@ import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import { Schedule } from 'src/database/entities/schedule.entity';
 import { generateQRCode } from 'src/utils/qrcode.utils';
+import { LivequeueService } from 'src/module/livequeue/livequeue.service';
 
 @Injectable()
 export class AppointmentService {
@@ -23,6 +24,7 @@ export class AppointmentService {
     @InjectRepository(Schedule)
     private readonly scheduleRepository: Repository<Schedule>,
     private readonly dataSource: DataSource,
+    private readonly liveQueueService: LivequeueService,
   ) {}
 
   generateBookingCode(): string {

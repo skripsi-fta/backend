@@ -10,6 +10,6 @@ import { LivequeueService } from './livequeue.service';
   imports: [LoggerModule, TypeOrmModule.forFeature([Appointment])],
   controllers: [LiveQueueController],
   providers: [LiveQueueGateaway, LivequeueService],
-  exports: [LiveQueueGateaway],
+  exports: [LiveQueueGateaway, LivequeueService],
 })
 export class LivequeueModule {}
