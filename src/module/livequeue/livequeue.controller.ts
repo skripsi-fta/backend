@@ -36,4 +36,17 @@ export class LiveQueueController {
       data: data,
     });
   }
+
+  @Get('doctor')
+  async getDoctorQueue(@Res() res: Response) {
+    this.log.info('Pharmacy Queue GET');
+
+    const data = await this.liveQueueService.getLiveDoctorQueue();
+
+    return sendResponse(res, {
+      statusCode: 200,
+      message: 'Success - Get Live Doctor Queue',
+      data: data,
+    });
+  }
 }
