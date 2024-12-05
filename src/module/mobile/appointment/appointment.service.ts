@@ -208,4 +208,52 @@ export class AppointmentService {
       totalRows: Number(data[0]?.total || 0),
     };
   }
+
+  async getDetailAppointment(appointmentId: number) {
+    const data = (await this.dataSource.query(
+      `
+        SELECT
+            a.id as "appointmentId",
+            s.id as "scheduleId",
+            a.booking_code as "bookingCode",
+            a.appointment_status as "status",
+            a.is_check_in as "checkedIn",
+            TO_CHAR(a.check_in_time, 'HH24:MI') as "checkInTime",
+            TO_CHAR(a.finish_time, 'HH24:MI') as "finishTime",
+            a.consultation_fee as "consultationFee",
+            a.pharmacy_fee as "pharmacyFee",
+            a.notes as "notesDoctor",
+            a.rating,
+            d.name as "doctorName",
+            s2."name" as "spesialisasiName",
+            s.date as "scheduleDate",
+            TO_CHAR(s.start_time, 'HH24:MI') as "startTime",
+            TO_CHAR(s.end_time, 'HH24:MI') as "endTime",
+            r."name" as "roomName",
+            m.diagnosis_doctor as "diagnosisDoctor",
+            m.prescription,
+            m.notes as "notesMedicalRecord"
+        FROM
+            appointment a
+        LEFT JOIN medical_record m ON m.id = a.medical_record_id
+        LEFT JOIN schedule s ON s.id = a.schedule_id
+        LEFT JOIN doctor d ON d.id = s.doctor_id
+        LEFT JOIN room r ON r.id = s.room_id
+        LEFT JOIN specialization s2 ON s2.id = d.id
+        WHERE a.id = $1
+      `,
+      [appointmentId],
+    )) as Array<{ appointmentId: number; scheduleId: number }>;
+
+    if (data.length === 0) {
+      throw new ResponseError(
+        'Janji temu tidak ditemukan',
+        StatusCodes.NOT_FOUND,
+      );
+    }
+
+    const appointmentData = data[0];
+
+    return { ...appointmentData };
+  }
 }
