@@ -13,8 +13,6 @@ export class LiveQueueController {
 
   @Get('pharmacy')
   async getPharmacyQueue(@Res() res: Response) {
-    this.log.info('Pharmacy Queue GET');
-
     const data = await this.liveQueueService.getLivePharmacyQueue();
 
     return sendResponse(res, {
@@ -26,8 +24,6 @@ export class LiveQueueController {
 
   @Get('cashier')
   async getCashierQueue(@Res() res: Response) {
-    this.log.info('Pharmacy Queue GET');
-
     const data = await this.liveQueueService.getLiveCashierQueue();
 
     return sendResponse(res, {
@@ -39,8 +35,6 @@ export class LiveQueueController {
 
   @Get('doctor')
   async getDoctorQueue(@Res() res: Response) {
-    this.log.info('Pharmacy Queue GET');
-
     const data = await this.liveQueueService.getLiveDoctorQueue();
 
     return sendResponse(res, {
