@@ -62,4 +62,19 @@ export class AppointmentController {
       data,
     });
   }
+
+  @Get('detail')
+  async getDetailAppointment(
+    @Res() res: Response,
+    @Query('appointmentId') appointmentId: number,
+  ) {
+    const data =
+      await this.appointmentService.getDetailAppointment(appointmentId);
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      message: 'Success - Get Detail Appointment',
+      data,
+    });
+  }
 }
