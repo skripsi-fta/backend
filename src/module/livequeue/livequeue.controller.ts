@@ -13,8 +13,6 @@ export class LiveQueueController {
 
   @Get('pharmacy')
   async getPharmacyQueue(@Res() res: Response) {
-    this.log.info('Pharmacy Queue GET');
-
     const data = await this.liveQueueService.getLivePharmacyQueue();
 
     return sendResponse(res, {
@@ -26,13 +24,22 @@ export class LiveQueueController {
 
   @Get('cashier')
   async getCashierQueue(@Res() res: Response) {
-    this.log.info('Pharmacy Queue GET');
-
     const data = await this.liveQueueService.getLiveCashierQueue();
 
     return sendResponse(res, {
       statusCode: 200,
       message: 'Success - Get Live Cashier Queue',
+      data: data,
+    });
+  }
+
+  @Get('doctor')
+  async getDoctorQueue(@Res() res: Response) {
+    const data = await this.liveQueueService.getLiveDoctorQueue();
+
+    return sendResponse(res, {
+      statusCode: 200,
+      message: 'Success - Get Live Doctor Queue',
       data: data,
     });
   }
