@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { Appointment } from './appointment.entitity';
 import { Doctor } from './doctor.entity';
+import { Schedule } from './schedule.entity';
 
 @Entity()
 export class DoctorQueue {
@@ -37,4 +38,7 @@ export class DoctorQueue {
 
   @OneToOne(() => Appointment, (appointment) => appointment.id)
   appointment: Appointment;
+
+  @ManyToOne(() => Schedule, (schedule) => schedule.doctorQueue)
+  schedule: Schedule;
 }

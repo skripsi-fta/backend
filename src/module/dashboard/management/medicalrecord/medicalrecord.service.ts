@@ -134,7 +134,7 @@ export class MedicalrecordService {
         ON
             a.doctor_queue_id = dq.id
         WHERE
-            schedule_id = $1
+            a.schedule_id = $1
         ORDER BY
             dq.queue_number DESC
         LIMIT 1
@@ -154,6 +154,7 @@ export class MedicalrecordService {
     doctorQueue.startTime = new Date();
     doctorQueue.doctor = appointmentExist.schedule.doctor;
     doctorQueue.queueNumber = doctorQueueNumber;
+    doctorQueue.schedule = appointmentExist.schedule;
 
     appointmentExist.doctorQueue = doctorQueue;
     appointmentExist.appointmentStatus = AppointmentStatus.DOCTORQUEUE;

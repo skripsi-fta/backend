@@ -234,7 +234,10 @@ export class AppointmentService {
             r."name" as "roomName",
             m.diagnosis_doctor as "diagnosisDoctor",
             m.prescription,
-            m.notes as "notesMedicalRecord"
+            m.notes as "notesMedicalRecord",
+            cq.queue_number as "cashierQueueNumber",
+            pq.queue_number as "pharmacyQueueNumber",
+            dq.queue_number as "doctorQueueNumber"
         FROM
             appointment a
         LEFT JOIN medical_record m ON m.id = a.medical_record_id
@@ -242,6 +245,9 @@ export class AppointmentService {
         LEFT JOIN doctor d ON d.id = s.doctor_id
         LEFT JOIN room r ON r.id = s.room_id
         LEFT JOIN specialization s2 ON s2.id = d.id
+        LEFT JOIN cashier_queue cq ON cq.id = a.cashier_queue_id
+        LEFT JOIN pharmacy_queue pq ON pq.id = a.pharmacy_queue_id
+        LEFT JOIN doctor_queue dq ON dq.id = a.doctor_queue_id
         WHERE a.id = $1
       `,
       [appointmentId],
