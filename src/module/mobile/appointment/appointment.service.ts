@@ -263,5 +263,7 @@ export class AppointmentService {
     const cashierQ = await this.liveQueueService.getLiveCashierQueue();
 
     const pharmacyQ = await this.liveQueueService.getLivePharmacyQueue();
+
+    console.log({ cashierQ, pharmacyQ });
   }
 }

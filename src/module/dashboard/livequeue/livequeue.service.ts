@@ -26,7 +26,7 @@ export class LivequeueService {
             join pharmacy_queue pq on a.pharmacy_queue_id = pq.id
             join patient p on a.patient_id = p.id
             join schedule s on a.schedule_id = s.id
-            where s."date" = '${dateNow}'
+            where pq."date" = '${dateNow}'
         order by
             case when pq.finish_time IS NULL then 0 else 1 end ASC,
             case when pq.finish_time IS NOT NULL then pq.queue_number else NULL end DESC,
@@ -53,7 +53,7 @@ export class LivequeueService {
         join cashier_queue cq on a.cashier_queue_id = cq.id
         join patient p on a.patient_id = p.id
         join schedule s on a.schedule_id = s.id
-        where s."date" = '${dateNow}'
+        where cq."date" = '${dateNow}'
         order by
             case when cq.finish_time IS NULL then 0 else 1 end ASC,
             case when cq.finish_time IS NOT NULL then cq.queue_number else NULL end DESC,
