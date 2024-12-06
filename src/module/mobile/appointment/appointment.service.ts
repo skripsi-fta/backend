@@ -245,7 +245,7 @@ export class AppointmentService {
         WHERE a.id = $1
       `,
       [appointmentId],
-    )) as Array<{ appointmentId: number; scheduleId: number }>;
+    )) as Array<{ appointmentId: number; scheduleId: number; status: string }>;
 
     if (data.length === 0) {
       throw new ResponseError(
@@ -264,6 +264,8 @@ export class AppointmentService {
 
     const pharmacyQ = await this.liveQueueService.getLivePharmacyQueue();
 
-    console.log({ cashierQ, pharmacyQ });
+    const detailAppointment = await this.getDetailAppointment(appointmentId);
+
+    return { cashierQ, pharmacyQ, detailAppointment };
   }
 }

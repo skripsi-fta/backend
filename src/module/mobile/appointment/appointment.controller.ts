@@ -18,7 +18,7 @@ import { ResponseError, sendResponse } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 
 @Controller('')
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 export class AppointmentController {
   constructor(private appointmentService: AppointmentService) {}
 
