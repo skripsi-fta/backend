@@ -14,11 +14,11 @@ import { AppointmentService } from './appointment.service';
 import type { Request, Response } from 'express';
 import type { CreateAppointmentDTO } from './model/appointment.dto';
 import type { UserDTO } from '../auth/model/auth.dto';
-import { sendResponse } from 'src/utils/api.utils';
+import { ResponseError, sendResponse } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 
 @Controller('')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 export class AppointmentController {
   constructor(private appointmentService: AppointmentService) {}
 
@@ -68,12 +68,35 @@ export class AppointmentController {
     @Res() res: Response,
     @Query('appointmentId') appointmentId: number,
   ) {
+    if (!appointmentId) {
+      throw new ResponseError('Invalid Field Format', StatusCodes.BAD_REQUEST);
+    }
+
     const data =
       await this.appointmentService.getDetailAppointment(appointmentId);
 
     return sendResponse(res, {
       statusCode: StatusCodes.OK,
       message: 'Success - Get Detail Appointment',
+      data,
+    });
+  }
+
+  @Get('queue')
+  async getQueueAppointment(
+    @Res() res: Response,
+    @Query('appointmentId') appointmentId: number,
+  ) {
+    if (!appointmentId) {
+      throw new ResponseError('Invalid Field Format', StatusCodes.BAD_REQUEST);
+    }
+
+    const data =
+      await this.appointmentService.getQueueAppointment(appointmentId);
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      message: 'Success - Get Queue Appointment',
       data,
     });
   }

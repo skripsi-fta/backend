@@ -258,4 +258,10 @@ export class AppointmentService {
 
     return { ...appointmentData };
   }
+
+  async getQueueAppointment(appointmentId: number) {
+    const cashierQ = await this.liveQueueService.getLiveCashierQueue();
+
+    const pharmacyQ = await this.liveQueueService.getLivePharmacyQueue();
+  }
 }
