@@ -19,7 +19,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MobileModule } from './module/mobile/mobile.module';
 import { StorageModule } from './module/storage/storage.module';
-import { LivequeueModule } from './module/livequeue/livequeue.module';
+import { LivequeueModule } from './module/dashboard/livequeue/livequeue.module';
 import { InitDatabaseModule } from './database/init/init.module';
 
 @Module({

@@ -7,7 +7,7 @@ import { AppointmentService } from './appointment.service';
 import { Auth } from 'src/database/entities/auth.entitity';
 import { Patient } from 'src/database/entities/patient.entity';
 import { Schedule } from 'src/database/entities/schedule.entity';
-import { LivequeueModule } from 'src/module/livequeue/livequeue.module';
+import { LivequeueModule } from 'src/module/dashboard/livequeue/livequeue.module';
 
 @Module({
   imports: [

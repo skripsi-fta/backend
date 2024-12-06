@@ -7,7 +7,7 @@ import { Patient } from 'src/database/entities/patient.entity';
 import { MedicalRecord } from 'src/database/entities/medicalrecord.entity';
 import { Appointment } from 'src/database/entities/appointment.entitity';
 import { DoctorQueue } from 'src/database/entities/doctorqueue.entity';
-import { LivequeueModule } from 'src/module/livequeue/livequeue.module';
+import { LivequeueModule } from 'src/module/dashboard/livequeue/livequeue.module';
 
 @Module({
   imports: [

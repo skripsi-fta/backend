@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { LoggerService } from '../logger/logger.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Appointment } from 'src/database/entities/appointment.entitity';
 import { DataSource, Repository } from 'typeorm';
 import { DateTime } from 'luxon';
+import { LoggerService } from 'src/module/logger/logger.service';
 
 @Injectable()
 export class LivequeueService {

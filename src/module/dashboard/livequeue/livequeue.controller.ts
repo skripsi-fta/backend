@@ -1,10 +1,10 @@
 import { Controller, Get, Res } from '@nestjs/common';
-import { LoggerService } from '../logger/logger.service';
+import { LoggerService } from '../../logger/logger.service';
 import { sendResponse } from 'src/utils/api.utils';
 import { Response } from 'express';
 import { LivequeueService } from './livequeue.service';
 
-@Controller('livequeue')
+@Controller('')
 export class LiveQueueController {
   constructor(
     private log: LoggerService,

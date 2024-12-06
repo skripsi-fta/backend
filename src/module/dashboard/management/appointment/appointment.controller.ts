@@ -18,7 +18,7 @@ import { AppointmentStatus } from 'src/database/entities/appointment.entitity';
 import { JwtAuthGuard } from '../../auth/guards/jwt.guards';
 import { Roles } from 'src/decorator/role.decorator';
 import { StaffRole } from 'src/database/entities/staff.entity';
-import { LiveQueueGateaway } from 'src/module/livequeue/livequeuegateaway';
+import { LiveQueueGateaway } from 'src/module/dashboard/livequeue/livequeuegateaway';
 
 @Controller('')
 @UseGuards(JwtAuthGuard)

@@ -22,7 +22,7 @@ import {
   MedicalRecordPostDTO,
   MedicalRecordPutDTO,
 } from './model/medicalrecord.dto';
-import { LiveQueueGateaway } from 'src/module/livequeue/livequeuegateaway';
+import { LiveQueueGateaway } from 'src/module/dashboard/livequeue/livequeuegateaway';
 
 @Controller('')
 @Roles(StaffRole.MANAGEMENT)

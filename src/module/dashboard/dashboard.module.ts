@@ -15,7 +15,7 @@ import { ScheduleDoctorModule } from './doctor/schedule/schedule.module';
 import { AppointmentDoctorModule } from './doctor/appointment/appointment.module';
 import { PharmacyModule } from './pharmacy/pharmacy.module';
 import { CashierModule } from './cashier/cashier.module';
-import { LivequeueModule } from '../livequeue/livequeue.module';
+import { LivequeueModule } from './livequeue/livequeue.module';
 
 @Module({
   imports: [
@@ -89,6 +89,10 @@ import { LivequeueModule } from '../livequeue/livequeue.module';
       {
         path: 'dashboard/cashier',
         module: CashierModule,
+      },
+      {
+        path: 'dashboard/livequeue',
+        module: LivequeueModule,
       },
     ]),
   ],

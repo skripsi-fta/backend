@@ -11,7 +11,7 @@ import { AppointmentDoctorController } from './appointment.controller';
 import { AppointmentDoctorService } from './appointment.service';
 import { Staff } from 'src/database/entities/staff.entity';
 import { PharmacyQueue } from 'src/database/entities/pharmacyqueue.entity';
-import { LivequeueModule } from 'src/module/livequeue/livequeue.module';
+import { LivequeueModule } from 'src/module/dashboard/livequeue/livequeue.module';
 
 @Module({
   imports: [

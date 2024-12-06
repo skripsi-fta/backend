@@ -18,7 +18,7 @@ import { Response } from 'express';
 import { sendResponse } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import { PharmacyUpdateDTO } from './model/pharmacy.dto';
-import { LiveQueueGateaway } from 'src/module/livequeue/livequeuegateaway';
+import { LiveQueueGateaway } from 'src/module/dashboard/livequeue/livequeuegateaway';
 
 @Controller('')
 @Roles(StaffRole.MANAGEMENT, StaffRole.PHARMACIST)
