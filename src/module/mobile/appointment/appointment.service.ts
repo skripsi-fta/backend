@@ -1,9 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Appointment } from 'src/database/entities/appointment.entitity';
+import {
+  Appointment,
+  AppointmentStatus,
+} from 'src/database/entities/appointment.entitity';
 import { DataSource, Repository } from 'typeorm';
 import { UserDTO } from '../auth/model/auth.dto';
-import { CreateAppointmentDTO } from './model/appointment.dto';
+import {
+  CreateAppointmentDTO,
+  PostRatingApppointmentDTO,
+} from './model/appointment.dto';
 import { Patient } from 'src/database/entities/patient.entity';
 import { Auth } from 'src/database/entities/auth.entitity';
 import { ResponseError } from 'src/utils/api.utils';
@@ -267,5 +273,70 @@ export class AppointmentService {
     const detailAppointment = await this.getDetailAppointment(appointmentId);
 
     return { cashierQ, pharmacyQ, detailAppointment };
+  }
+
+  async postRatingAppointment(body: PostRatingApppointmentDTO) {
+    if (!body.appointmentId || !body.rating) {
+      throw new ResponseError('Invalid Field Format', StatusCodes.BAD_REQUEST);
+    }
+    const appointment = await this.appointmentRepository.findOne({
+      where: {
+        id: body.appointmentId,
+      },
+      relations: {
+        schedule: {
+          doctor: true,
+        },
+      },
+    });
+
+    if (!appointment) {
+      throw new ResponseError(
+        'Janji temu tidak ditemukan',
+        StatusCodes.NOT_FOUND,
+      );
+    }
+
+    if (appointment.appointmentStatus !== AppointmentStatus.DONE) {
+      throw new ResponseError('Janji temu belum selesai', StatusCodes.CONFLICT);
+    }
+
+    if (appointment.rating !== null) {
+      throw new ResponseError(
+        'Anda sudah memberikan rating',
+        StatusCodes.CONFLICT,
+      );
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      appointment.rating = body.rating;
+
+      const countDoctorRating =
+        Math.floor(
+          ((appointment.schedule.doctor.rating *
+            appointment.schedule.doctor.totalRating +
+            Number(body.rating)) /
+            (appointment.schedule.doctor.totalRating + 1)) *
+            100,
+        ) / 100;
+
+      appointment.schedule.doctor.totalRating += 1;
+      appointment.schedule.doctor.rating = countDoctorRating;
+
+      await queryRunner.manager.save(appointment.schedule.doctor);
+      await queryRunner.manager.save(appointment.schedule);
+      await queryRunner.manager.save(appointment);
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
