@@ -33,9 +33,6 @@ export class Appointment {
   @Column({ nullable: false })
   bookingCode: string;
 
-  @Column({ nullable: false })
-  bookingQr: string;
-
   @Column({
     type: 'enum',
     enum: AppointmentStatus,

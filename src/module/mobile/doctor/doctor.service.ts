@@ -210,11 +210,11 @@ export class DoctorService {
             s."type",
             CAST(SUM(CASE WHEN a.appointment_status != 'cancel' THEN 1 ELSE 0 END) as INTEGER) as "totalPasien",
             CASE
-                WHEN NOW() > (s.date + s.start_time::time) THEN 'Tidak Tersedia'
+                WHEN NOW() > (s.date + s.end_time::time) THEN 'Tidak Tersedia'
                 WHEN CAST(COUNT(a.id) AS INTEGER) > (s.capacity * 0.7) THEN 'Hampir Penuh'
                 WHEN CAST(COUNT(a.id) as INTEGER) = s.capacity THEN 'Tidak Tersedia'
                 ELSE 'Tersedia'
-                END AS "status",
+            END AS "status",
             r.name as "namaRuangan"
         FROM
             schedule s
