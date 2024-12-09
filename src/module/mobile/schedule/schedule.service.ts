@@ -22,11 +22,11 @@ export class ScheduleService {
     const whereParams: any[] = [];
 
     if (endDate) {
-      whereQuery += ` AND s.date BETWEEN $${whereParams.length + 1} and $${whereParams.length + 2}`;
+      whereQuery += ` AND s.date BETWEEN $${whereParams.length + 1} AND $${whereParams.length + 2}`;
       whereParams.push(startDate, endDate);
     } else {
-      whereQuery += ` AND s.date >= $${whereParams.length + 1}`;
-      whereParams.push(startDate);
+      whereQuery +=
+        ' AND (s.date >= NOW() OR (s.date = CURRENT_DATE AND s.end_time >= NOW()::time))';
     }
 
     const data = await this.dataSource.query(
@@ -34,7 +34,7 @@ export class ScheduleService {
         WITH schedule_data AS (
             SELECT
                 s.id,
-                s.date,
+                TO_CHAR(s.date, 'YYYY-MM-DD') as "date",
                 s.capacity,
                 s.status,
                 TO_CHAR(s.start_time, 'HH24:MI') as "startTime",

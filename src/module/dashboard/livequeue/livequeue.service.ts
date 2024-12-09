@@ -33,7 +33,7 @@ export class LivequeueService {
             pq.queue_number ASC
         limit 1
       `,
-    )) as Array<{ queryNumber: number; patientName: string }>;
+    )) as Array<{ queueNumber: number; patientName: string }>;
 
     if (data.length === 0) {
       return null;
@@ -59,7 +59,7 @@ export class LivequeueService {
             case when cq.finish_time IS NOT NULL then cq.queue_number else NULL end DESC,
             cq.queue_number ASC
         limit 1`,
-    )) as Array<{ queryNumber: number; patientName: string }>;
+    )) as Array<{ queueNumber: number; patientName: string }>;
 
     if (data.length === 0) {
       return null;
@@ -103,5 +103,58 @@ export class LivequeueService {
       queueNumber: item.queuenumber.toString(),
       totalQueue: item.totalqueue,
     }));
+  }
+
+  async getGlobalQueue() {
+    const loggerDateFormat = 'yyyy-MM-dd';
+    const currDate = DateTime.now();
+    const dateNow = currDate.toFormat(loggerDateFormat);
+
+    const data = (await this.dataSource.query(
+      `
+        SELECT
+            a.global_queue as "queueNumber",
+            p."name" as "patientName"
+        FROM
+            appointment a
+        LEFT JOIN schedule s ON s.id = a.schedule_id
+        LEFT JOIN patient p ON a.patient_id = p.id
+        WHERE s.date = '${dateNow}' AND a.global_queue IS NOT NULL
+        ORDER BY a.global_queue DESC
+        LIMIT 1
+      `,
+    )) as Array<{ queueNumber: number; patientName: string }>;
+
+    if (data.length === 0) {
+      return null;
+    }
+
+    return data[0];
+  }
+
+  async getDoctorQueue(scheduleId: number) {
+    const data = (await this.dataSource.query(
+      `
+        SELECT
+            dq.queue_number as "queueNumber",
+            p."name" as "patientName"
+        FROM
+            appointment a
+        LEFT JOIN doctor_queue dq ON a.doctor_queue_id = dq.id
+        LEFT JOIN patient p on a.patient_id = p.id
+        WHERE dq.schedule_id = $1
+        ORDER BY
+            CASE WHEN dq.finish_time IS NULL THEN 0 ELSE 1 END ASC,
+            CASE WHEN dq.finish_time IS NOT NULL THEN dq.queue_number ELSE NULL END DESC
+        LIMIT 1
+      `,
+      [scheduleId],
+    )) as Array<{ queueNumber: number; patientName: string }>;
+
+    if (data.length === 0) {
+      return null;
+    }
+
+    return data[0];
   }
 }

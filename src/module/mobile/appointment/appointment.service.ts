@@ -9,7 +9,6 @@ import { Auth } from 'src/database/entities/auth.entitity';
 import { ResponseError } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
 import { Schedule } from 'src/database/entities/schedule.entity';
-import { generateQRCode } from 'src/utils/qrcode.utils';
 import { LivequeueService } from 'src/module/dashboard/livequeue/livequeue.service';
 
 @Injectable()
@@ -93,15 +92,8 @@ export class AppointmentService {
 
     const bookingCode = this.generateBookingCode();
 
-    const data = {
-      bookingCode: bookingCode,
-    };
-
-    const bookingQr = await generateQRCode(JSON.stringify(data));
-
     const appointment = this.appointmentRepository.create({
       bookingCode: bookingCode,
-      bookingQr: bookingQr,
       patient: userPatientData.patient,
       schedule: scheduleExist,
     });
@@ -146,11 +138,11 @@ export class AppointmentService {
     whereParams.push(userPatientData.patient.id);
 
     if (type === 'mendatang') {
-      whereQuery += ` AND NOW() < (s.date + s.end_time::time)`;
+      whereQuery += ` AND (NOW() < (s.date + s.end_time::time) OR a.appointment_status NOT IN('done', 'cancel'))`;
     }
 
     if (type === 'lalu') {
-      whereQuery += ` AND NOW() > (s.date + s.end_time::time)`;
+      whereQuery += ` AND (NOW() > (s.date + s.end_time::time) AND a.appointment_status IN('done', 'cancel'))`;
     }
 
     const data = await this.dataSource.query(
@@ -159,7 +151,7 @@ export class AppointmentService {
             SELECT
                 a.id,
                 s.id as "scheduleId",
-                s.date,
+                TO_CHAR(s.date, 'YYYY-MM-DD') as "date",
                 s.capacity,
                 s.status,
                 TO_CHAR(s.start_time, 'HH24:MI') as "startTime",
@@ -176,7 +168,7 @@ export class AppointmentService {
                 appointment a
             LEFT JOIN schedule s ON s.id = a.schedule_id
             LEFT JOIN doctor d ON d.id = s.doctor_id
-            LEFT JOIN specialization s2 ON s2.id = d.id
+            LEFT JOIN specialization s2 ON s2.id = d.specialization_id
             ${whereQuery}
             ORDER BY s."date" ASC, s.start_time ASC
         ),
@@ -228,20 +220,27 @@ export class AppointmentService {
             a.rating,
             d.name as "doctorName",
             s2."name" as "spesialisasiName",
-            s.date as "scheduleDate",
+            TO_CHAR(s.date, 'YYYY-MM-DD') as "scheduleDate",
             TO_CHAR(s.start_time, 'HH24:MI') as "startTime",
             TO_CHAR(s.end_time, 'HH24:MI') as "endTime",
             r."name" as "roomName",
             m.diagnosis_doctor as "diagnosisDoctor",
             m.prescription,
-            m.notes as "notesMedicalRecord"
+            m.notes as "notesMedicalRecord",
+            cq.queue_number as "cashierQueueNumber",
+            pq.queue_number as "pharmacyQueueNumber",
+            dq.queue_number as "doctorQueueNumber",
+            s.moved_to_id as "scheduleMoveId"
         FROM
             appointment a
         LEFT JOIN medical_record m ON m.id = a.medical_record_id
         LEFT JOIN schedule s ON s.id = a.schedule_id
         LEFT JOIN doctor d ON d.id = s.doctor_id
         LEFT JOIN room r ON r.id = s.room_id
-        LEFT JOIN specialization s2 ON s2.id = d.id
+        LEFT JOIN specialization s2 ON s2.id = d.specialization_id
+        LEFT JOIN cashier_queue cq ON cq.id = a.cashier_queue_id
+        LEFT JOIN pharmacy_queue pq ON pq.id = a.pharmacy_queue_id
+        LEFT JOIN doctor_queue dq ON dq.id = a.doctor_queue_id
         WHERE a.id = $1
       `,
       [appointmentId],
@@ -260,12 +259,24 @@ export class AppointmentService {
   }
 
   async getQueueAppointment(appointmentId: number) {
-    const cashierQ = await this.liveQueueService.getLiveCashierQueue();
+    const globalQueue = await this.liveQueueService.getGlobalQueue();
 
-    const pharmacyQ = await this.liveQueueService.getLivePharmacyQueue();
+    const cashierQueue = await this.liveQueueService.getLiveCashierQueue();
+
+    const pharmacyQueue = await this.liveQueueService.getLivePharmacyQueue();
 
     const detailAppointment = await this.getDetailAppointment(appointmentId);
 
-    return { cashierQ, pharmacyQ, detailAppointment };
+    const doctorQueue = await this.liveQueueService.getDoctorQueue(
+      detailAppointment.scheduleId,
+    );
+
+    return {
+      globalQueue,
+      doctorQueue,
+      pharmacyQueue,
+      cashierQueue,
+      detailAppointment,
+    };
   }
 }

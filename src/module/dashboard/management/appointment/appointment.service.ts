@@ -12,7 +12,6 @@ import { StatusCodes } from 'http-status-codes';
 import { ResponseError } from 'src/utils/api.utils';
 import { Schedule } from 'src/database/entities/schedule.entity';
 import { MedicalRecord } from 'src/database/entities/medicalrecord.entity';
-import { generateQRCode } from 'src/utils/qrcode.utils';
 import * as dayjs from 'dayjs';
 
 @Injectable()
@@ -64,7 +63,6 @@ export class AppointmentService {
       select: [
         'id',
         'bookingCode',
-        'bookingQr',
         'appointmentStatus',
         'medicalRecord',
         'isCheckIn',
@@ -97,7 +95,6 @@ export class AppointmentService {
     const result = data.map((appointment) => ({
       id: appointment.id,
       bookingCode: appointment.bookingCode,
-      bookingQr: appointment.bookingQr,
       patientId: appointment.patient.id,
       patientName: appointment.patient.name,
       appointmentStatus: appointment.appointmentStatus,
@@ -180,15 +177,8 @@ export class AppointmentService {
 
     const bookingCode = this.generateBookingCode();
 
-    const data = {
-      bookingCode: bookingCode,
-    };
-
-    const bookingQr = await generateQRCode(JSON.stringify(data));
-
     const appointment = await this.appointmentRepository.create({
       bookingCode: bookingCode,
-      bookingQr: bookingQr,
       patient: patientExist,
       schedule: scheduleExist,
     });
