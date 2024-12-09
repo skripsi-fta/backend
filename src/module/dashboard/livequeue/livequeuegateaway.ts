@@ -8,7 +8,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { LoggerService } from '../../logger/logger.service';
 
-@WebSocketGateway()
+@WebSocketGateway({ cors: true })
 export class LiveQueueGateaway
   implements OnGatewayConnection, OnGatewayDisconnect
 {

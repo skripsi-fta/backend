@@ -296,6 +296,12 @@ export class AppointmentService {
         },
         where: {
           appointmentStatus: Not(AppointmentStatus.SCHEDULED),
+          schedule: {
+            date: new Date(),
+          },
+        },
+        relations: {
+          schedule: true,
         },
       });
 
