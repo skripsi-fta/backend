@@ -43,4 +43,15 @@ export class LiveQueueController {
       data: data,
     });
   }
+
+  @Get('global')
+  async getGlobalQueue(@Res() res: Response) {
+    const data = await this.liveQueueService.getGlobalQueue();
+
+    return sendResponse(res, {
+      statusCode: 200,
+      message: 'Success - Get Live Global Queue',
+      data: data,
+    });
+  }
 }

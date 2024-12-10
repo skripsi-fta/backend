@@ -138,11 +138,11 @@ export class AppointmentService {
     whereParams.push(userPatientData.patient.id);
 
     if (type === 'mendatang') {
-      whereQuery += ` AND (NOW() < (s.date + s.end_time::time) OR a.appointment_status NOT IN('done', 'cancel'))`;
+      whereQuery += ` AND (NOW() < (s.date + s.end_time::time) AND a.appointment_status NOT IN('done', 'cancel'))`;
     }
 
     if (type === 'lalu') {
-      whereQuery += ` AND (NOW() > (s.date + s.end_time::time) AND a.appointment_status IN('done', 'cancel'))`;
+      whereQuery += ` AND (NOW() > (s.date + s.end_time::time) OR a.appointment_status IN('done', 'cancel'))`;
     }
 
     const data = await this.dataSource.query(
@@ -227,6 +227,7 @@ export class AppointmentService {
             m.diagnosis_doctor as "diagnosisDoctor",
             m.prescription,
             m.notes as "notesMedicalRecord",
+            a.global_queue as "globalQueueNumber",
             cq.queue_number as "cashierQueueNumber",
             pq.queue_number as "pharmacyQueueNumber",
             dq.queue_number as "doctorQueueNumber",
