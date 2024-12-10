@@ -56,7 +56,7 @@ export class ScheduleService {
             ${whereQuery}
             GROUP BY s.id, d.id, s2."name"
             HAVING COUNT(a.id) < s.capacity
-            ORDER BY s.id
+            ORDER BY s.date ASC, s.start_time ASC
         ),
         total_count AS (
             SELECT COUNT(*) as total
