@@ -12,7 +12,10 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt.guards';
 import { AppointmentService } from './appointment.service';
 import type { Request, Response } from 'express';
-import type { CreateAppointmentDTO } from './model/appointment.dto';
+import type {
+  CreateAppointmentDTO,
+  PostRatingApppointmentDTO,
+} from './model/appointment.dto';
 import type { UserDTO } from '../auth/model/auth.dto';
 import { ResponseError, sendResponse } from 'src/utils/api.utils';
 import { StatusCodes } from 'http-status-codes';
@@ -97,6 +100,20 @@ export class AppointmentController {
     return sendResponse(res, {
       statusCode: StatusCodes.OK,
       message: 'Success - Get Queue Appointment',
+      data,
+    });
+  }
+
+  @Post('rating')
+  async postRatingAppointment(
+    @Res() res: Response,
+    @Body() body: PostRatingApppointmentDTO,
+  ) {
+    const data = await this.appointmentService.postRatingAppointment(body);
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      message: 'Success - Post Rating Appointment',
       data,
     });
   }
