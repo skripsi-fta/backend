@@ -21,25 +21,57 @@ export class LivequeueService {
 
     const data = (await this.dataSource.query(
       `
-        select pq.queue_number as "queueNumber", p."name" as "patientName"
-            from appointment a
-            join pharmacy_queue pq on a.pharmacy_queue_id = pq.id
-            join patient p on a.patient_id = p.id
-            join schedule s on a.schedule_id = s.id
-            where pq."date" = '${dateNow}'
-        order by
-            case when pq.finish_time IS NULL then 0 else 1 end ASC,
-            case when pq.finish_time IS NOT NULL then pq.queue_number else NULL end DESC,
-            pq.queue_number ASC
-        limit 1
-      `,
-    )) as Array<{ queueNumber: number; patientName: string }>;
+          SELECT
+              pq.queue_number as "queueNumber",
+              p."name" as "patientName",
+              a.appointment_status as "status"
+          FROM
+              appointment a
+          JOIN pharmacy_queue pq on a.pharmacy_queue_id = pq.id
+          JOIN patient p ON a.patient_id = p.id
+          JOIN schedule s ON a.schedule_id = s.id
+          WHERE pq."date" = '${dateNow}' AND a.appointment_status IN ('pharmacy queue', 'cashier queue', 'done')
+          ORDER BY pq.queue_number ASC
+        `,
+    )) as Array<{ queueNumber: number; patientName: string; status: string }>;
 
-    if (data.length === 0) {
-      return null;
+    let lastQueueNull: {
+      queueNumber: number;
+      patientName: string;
+      status: string;
+    } | null = null;
+
+    let queueReturn: {
+      queueNumber: number;
+      patientName: string;
+      status: string;
+    } | null = null;
+
+    for (let i = 0; i < data.length; i++) {
+      const current = data[i];
+      const next = data[i + 1] || null;
+      const afterNext = data[i + 2] || null;
+
+      if (current.status === 'pharmacy queue') {
+        lastQueueNull = current;
+        if (next && next.status !== 'pharmacy queue') {
+          if (afterNext && afterNext.status === 'pharmacy queue') {
+            queueReturn = afterNext;
+          }
+          continue;
+        }
+
+        return current;
+      }
     }
 
-    return data[0];
+    if (queueReturn) {
+      return queueReturn;
+    } else if (lastQueueNull) {
+      return lastQueueNull;
+    } else if (data[data.length - 1]) {
+      return data[data.length - 1];
+    } else return null;
   }
 
   async getLiveCashierQueue() {
@@ -48,24 +80,58 @@ export class LivequeueService {
     const dateNow = currDate.toFormat(loggerDateFormat);
 
     const data = (await this.dataSource.query(
-      `select cq.queue_number as "queueNumber", p."name" as "patientName"
-        from appointment a
-        join cashier_queue cq on a.cashier_queue_id = cq.id
-        join patient p on a.patient_id = p.id
-        join schedule s on a.schedule_id = s.id
-        where cq."date" = '${dateNow}'
-        order by
-            case when cq.finish_time IS NULL then 0 else 1 end ASC,
-            case when cq.finish_time IS NOT NULL then cq.queue_number else NULL end DESC,
-            cq.queue_number ASC
-        limit 1`,
-    )) as Array<{ queueNumber: number; patientName: string }>;
+      `
+          SELECT
+              cq.queue_number as "queueNumber",
+              p."name" as "patientName",
+              a.appointment_status as "status"
+          FROM
+              appointment a
+          JOIN cashier_queue cq on a.cashier_queue_id = cq.id
+          JOIN patient p ON a.patient_id = p.id
+          JOIN schedule s ON a.schedule_id = s.id
+          WHERE cq."date" = '${dateNow}' AND a.appointment_status IN ('cashier queue', 'done')
+          ORDER BY cq.queue_number ASC
+        `,
+    )) as Array<{ queueNumber: number; patientName: string; status: string }>;
 
-    if (data.length === 0) {
-      return null;
+    let lastQueueNull: {
+      queueNumber: number;
+      patientName: string;
+      status: string;
+    } | null = null;
+
+    let queueReturn: {
+      queueNumber: number;
+      patientName: string;
+      status: string;
+    } | null = null;
+
+    for (let i = 0; i < data.length; i++) {
+      const current = data[i];
+      const next = data[i + 1] || null;
+      const afterNext = data[i + 2] || null;
+
+      if (current.status === 'cashier queue') {
+        lastQueueNull = current;
+        if (next && next.status !== 'cashier queue') {
+          if (afterNext && afterNext.status === 'cashier queue') {
+            queueReturn = afterNext;
+          }
+          continue;
+        }
+
+        return current;
+      }
     }
 
-    return data[0];
+    if (queueReturn) {
+      return queueReturn;
+    } else if (lastQueueNull) {
+      return lastQueueNull;
+    } else if (data[data.length - 1]) {
+      return data[data.length - 1];
+    } else return null;
   }
 
   async getLiveDoctorQueue() {
@@ -74,35 +140,103 @@ export class LivequeueService {
     const dateNow = currDate.toFormat(loggerDateFormat);
 
     const data = await this.dataSource.query(
-      `with rankedRoom as (
-            with countRoom as (
-                select s2."name" as poli, d."name" as doctorName, r.id as roomId, r."name" as roomName, dq.queue_number as queueNumber, COUNT(*) OVER(PARTITION BY r.id ) AS totalCount, a.appointment_status as status
-                FROM room r 
-                join schedule s on r.id = s.room_id 
-                join appointment a on a.schedule_id = s.id
-                join doctor d on s.doctor_id = d.id 
-                join specialization s2 on s2.id = d.specialization_id 
-                join doctor_queue dq on a.doctor_queue_id = dq.id 
-                where s.date = '${dateNow}' and CURRENT_TIME between s.start_time and s.end_time 
-                order by dq.queue_number 
-            )
-            select poli, doctorName, roomId, roomName, queueNumber, totalCount, ROW_NUMBER() OVER (PARTITION BY roomId ORDER BY queueNumber ASC) AS rank
-            from countRoom
-            where status = 'doctor queue'
+      `
+        WITH earliest_schedules AS (
+            SELECT DISTINCT ON (s.room_id) 
+                s.room_id, 
+                s.id AS schedule_id, 
+                s.start_time, 
+                s.doctor_id
+            FROM schedule s
+            WHERE s.status = 'ready' AND s.date = '${dateNow}' 
+              AND CURRENT_TIME BETWEEN s.start_time AND s.end_time
+            ORDER BY s.room_id, s.start_time ASC
+        ),
+        appointment_counts AS (
+            SELECT
+                a.schedule_id,
+                COUNT(*) AS appointment_count
+            FROM appointment a
+            WHERE a.appointment_status NOT IN ('scheduled', 'checkin')
+            GROUP BY a.schedule_id
         )
-        select poli ,doctorName, roomId, roomName, queueNumber, totalCount as totalQueue
-        from rankedRoom
-        where rank = 1
-        order by roomId`,
+        SELECT 
+            s.room_id as "roomId", 
+            s.schedule_id as "scheduleId", 
+            r.name as "roomName", 
+            d.name as "doctorName", 
+            s2.name as "poli", 
+            dq.queue_number as "queueNumber", 
+            a.pharmacy_queue_id as "pharmacyQueueId", 
+            ac.appointment_count AS "totalQueue", 
+            dq.finish_time as "finishTime", 
+            p.name as "patientName"
+        FROM earliest_schedules s
+        JOIN appointment a ON s.schedule_id = a.schedule_id
+        JOIN room r ON r.id = s.room_id
+        JOIN doctor d ON d.id = s.doctor_id
+        JOIN specialization s2 ON s2.id = d.specialization_id
+        JOIN doctor_queue dq ON dq.id = a.doctor_queue_id
+        JOIN appointment_counts ac ON ac.schedule_id = s.schedule_id
+        JOIN patient p ON a.patient_id = p.id
+        WHERE a.appointment_status NOT IN ('scheduled', 'checkin')
+        ORDER BY dq.queue_number ASC, s.room_id, s.start_time, a.id
+      `,
     );
 
-    return data.map((item) => ({
-      poli: item.poli,
-      doctorName: item.doctorname,
-      roomName: item.roomname,
-      queueNumber: item.queuenumber.toString(),
-      totalQueue: item.totalqueue,
-    }));
+    const queryData = data.reduce((acc, curr) => {
+      if (!acc[curr.roomId]) {
+        acc[curr.roomId] = [];
+      }
+      acc[curr.roomId].push(curr);
+      return acc;
+    }, {});
+
+    const result = [];
+
+    for (const roomId of Object.keys(queryData)) {
+      const appointmentList = queryData[roomId];
+
+      let lastQueueNull: {
+        queueNumber: number;
+        finishTime: string;
+        patientName: string;
+      } | null = null;
+
+      let queueReturn: {
+        queueNumber: number;
+        finishTime: string;
+        patientName: string;
+      } | null = null;
+
+      for (let i = 0; i < appointmentList.length; i++) {
+        const current = appointmentList[i];
+        const next = appointmentList[i + 1] || null;
+        const afterNext = appointmentList[i + 2] || null;
+
+        if (current.finishTime === null) {
+          lastQueueNull = current;
+          if (next && next.finishTime !== null) {
+            if (afterNext && afterNext.finishTime === null) {
+              queueReturn = afterNext;
+            }
+            continue;
+          }
+
+          break;
+        }
+      }
+
+      if (queueReturn) {
+        result.push(queueReturn);
+      } else if (lastQueueNull) {
+        result.push(lastQueueNull);
+      } else if (appointmentList[appointmentList.length - 1]) {
+        result.push(appointmentList[appointmentList.length - 1]);
+      }
+    }
+
+    return result;
   }
 
   async getGlobalQueue() {
@@ -112,24 +246,64 @@ export class LivequeueService {
 
     const data = (await this.dataSource.query(
       `
-        SELECT
-            a.global_queue as "queueNumber",
-            p."name" as "patientName"
-        FROM
-            appointment a
-        LEFT JOIN schedule s ON s.id = a.schedule_id
-        LEFT JOIN patient p ON a.patient_id = p.id
-        WHERE s.date = '${dateNow}' AND a.global_queue IS NOT NULL
-        ORDER BY a.global_queue DESC
-        LIMIT 1
-      `,
-    )) as Array<{ queueNumber: number; patientName: string }>;
+          SELECT
+              a.global_queue as "queueNumber",
+              a.medical_record_id as "medicalRecordId",
+              p."name" as "patientName"
+          FROM
+              appointment a
+          LEFT JOIN schedule s ON s.id = a.schedule_id
+          LEFT JOIN patient p ON a.patient_id = p.id
+          WHERE s.date = '${dateNow}' AND appointment_status NOT IN ('scheduled', 'cancel')
+          ORDER BY a.global_queue ASC
+        `,
+    )) as Array<{
+      queueNumber: number;
+      medicalRecordId: number | null;
+      patientName: string;
+    }>;
 
     if (data.length === 0) {
       return null;
     }
 
-    return data[0];
+    let lastQueueNull: {
+      queueNumber: number;
+      medicalRecordId: number | null;
+      patientName: string;
+    } | null = null;
+
+    let queueReturn: {
+      queueNumber: number;
+      medicalRecordId: number | null;
+      patientName: string;
+    } | null = null;
+
+    for (let i = 0; i < data.length; i++) {
+      const current = data[i];
+      const next = data[i + 1] || null;
+      const afterNext = data[i + 2] || null;
+
+      if (current.medicalRecordId === null) {
+        lastQueueNull = current;
+        if (next && next.medicalRecordId !== null) {
+          if (afterNext && afterNext.medicalRecordId === null) {
+            queueReturn = afterNext;
+          }
+          continue;
+        }
+
+        return current;
+      }
+    }
+
+    if (queueReturn) {
+      return queueReturn;
+    } else if (lastQueueNull) {
+      return lastQueueNull;
+    } else if (data[data.length - 1]) {
+      return data[data.length - 1];
+    } else return null;
   }
 
   async getDoctorQueue(scheduleId: number) {
@@ -137,24 +311,67 @@ export class LivequeueService {
       `
         SELECT
             dq.queue_number as "queueNumber",
-            p."name" as "patientName"
+            p."name" as "patientName",
+            dq.finish_time as "finishTime"
         FROM
             appointment a
         LEFT JOIN doctor_queue dq ON a.doctor_queue_id = dq.id
         LEFT JOIN patient p on a.patient_id = p.id
         WHERE dq.schedule_id = $1
-        ORDER BY
-            CASE WHEN dq.finish_time IS NULL THEN 0 ELSE 1 END ASC,
-            CASE WHEN dq.finish_time IS NOT NULL THEN dq.queue_number ELSE NULL END DESC
-        LIMIT 1
+        ORDER BY dq.queue_number ASC
       `,
       [scheduleId],
-    )) as Array<{ queueNumber: number; patientName: string }>;
+    )) as Array<{
+      queueNumber: number;
+      patientName: string;
+      finishTime: string;
+    }>;
 
     if (data.length === 0) {
       return null;
     }
 
-    return data[0];
+    let lastQueueNull: {
+      queueNumber: number;
+      patientName: string;
+    } | null = null;
+
+    let queueReturn: {
+      queueNumber: number;
+      patientName: string;
+    } | null = null;
+
+    console.log(data);
+
+    for (let i = 0; i < data.length; i++) {
+      const current = data[i];
+      const next = data[i + 1] || null;
+      const afterNext = data[i + 2] || null;
+
+      if (current.finishTime === null) {
+        lastQueueNull = current;
+        if (next && next.finishTime !== null) {
+          if (afterNext && afterNext.finishTime === null) {
+            queueReturn = afterNext;
+          }
+          continue;
+        }
+
+        return current;
+      }
+    }
+
+    if (queueReturn) {
+      console.log('a', queueReturn);
+      return queueReturn;
+    } else if (lastQueueNull) {
+      console.log('b', lastQueueNull);
+
+      return queueReturn;
+    } else if (data[data.length - 1]) {
+      console.log('c', data[data.length - 1]);
+
+      return data[data.length - 1];
+    } else return null;
   }
 }
