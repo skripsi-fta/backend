@@ -24,6 +24,9 @@ export class ScheduleService {
     if (endDate) {
       whereQuery += ` AND s.date BETWEEN $${whereParams.length + 1} AND $${whereParams.length + 2}`;
       whereParams.push(startDate, endDate);
+    } else if (startDate) {
+      whereQuery += ` AND (s.date >= $${whereParams.length + 1} OR (s.date = CURRENT_DATE AND s.start_time >= NOW()::time))`;
+      whereParams.push(startDate);
     } else {
       whereQuery +=
         ' AND (s.date >= NOW() OR (s.date = CURRENT_DATE AND s.end_time >= NOW()::time))';
