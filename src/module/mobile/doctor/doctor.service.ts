@@ -25,8 +25,8 @@ export class DoctorService {
     const whereParams: any[] = [];
 
     if (name) {
-      whereQuery += ` AND WHERE LOWER(d."name") LIKE $${whereParams.length + 1}`;
-      whereParams.push(name);
+      whereQuery += ` AND LOWER(d."name") LIKE $${whereParams.length + 1}`;
+      whereParams.push('%' + name.toLowerCase() + '%');
     }
 
     if (spesialisasiId) {
