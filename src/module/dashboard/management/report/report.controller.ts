@@ -124,4 +124,56 @@ export class ReportManagementController {
       data,
     });
   }
+
+  @Get('doctor')
+  async getDoctorReport(
+    @Res() res: Response,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+    @Query('year') year: string,
+    @Query('month') month: string,
+    @Query('type') type: string,
+  ) {
+    const data = await this.reportService.getDoctorReport({
+      endDate,
+      startDate,
+      year,
+      month,
+      type,
+    });
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      message: 'Success - Get Report Doctor',
+      data,
+    });
+  }
+
+  @Get('doctor/data')
+  async getDoctorReportList(
+    @Res() res: Response,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+    @Query('year') year: string,
+    @Query('month') month: string,
+    @Query('type') type: string,
+    @Query('pageSize', new DefaultValuePipe(5)) pageSize: number,
+    @Query('pageNumber', new DefaultValuePipe(1)) pageNumber: number,
+  ) {
+    const data = await this.reportService.getDoctorReportList({
+      endDate,
+      startDate,
+      year,
+      month,
+      type,
+      pageSize,
+      pageNumber,
+    });
+
+    return sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      message: 'Success - Get List Report Doctor',
+      data,
+    });
+  }
 }
