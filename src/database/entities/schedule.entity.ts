@@ -2,17 +2,23 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
+  JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Appointment } from './appointment.entitity';
 import { Room } from './room.entity';
-import { TimeSlot } from './timeslot.entitity';
-import { Staff } from './staff.entity';
+import { Doctor } from './doctor.entity';
+import { FixedSchedule } from './fixedschedule.entity';
+import { ScheduleTemp } from './scheduletemp.entity';
+import { DoctorQueue } from './doctorqueue.entity';
 
 @Entity()
+@Index(['date', 'startTime', 'endTime', 'room'], { unique: true })
 export class Schedule {
   @PrimaryGeneratedColumn()
   id: number;
@@ -27,32 +33,48 @@ export class Schedule {
 
   @Column({
     type: 'enum',
-    enum: ['ready', 'full', 'cancelled'],
+    enum: ['ready', 'in review', 'cancelled', 'changed', 'finish'],
   })
   status: string;
 
-  @Column({
-    nullable: true,
-  })
-  moved_to: number;
+  @OneToOne(() => Schedule, { nullable: true })
+  @JoinColumn()
+  movedTo: Schedule;
+
+  @Column({ type: 'time' })
+  startTime: string;
+
+  @Column({ type: 'time' })
+  endTime: string;
+
+  @Column({ type: 'enum', enum: ['special', 'regular'] })
+  type: string;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({
     nullable: true,
   })
-  updated_at: Date;
+  updatedAt: Date;
 
   @ManyToOne(() => Room, (room) => room.id)
   room: Room;
 
-  @ManyToOne(() => TimeSlot, (timeslot) => timeslot.id)
-  timeslot: TimeSlot;
+  @ManyToOne(() => Doctor, (doctor) => doctor.id)
+  doctor: Doctor;
 
-  @ManyToOne(() => Staff, (staff) => staff.id)
-  staff: Staff;
+  @OneToMany(() => Appointment, (appointment) => appointment.schedule)
+  appointments: Appointment[];
 
-  @OneToMany(() => Appointment, (appointment) => appointment.id)
-  Appointments: Appointment[];
+  @ManyToOne(() => FixedSchedule, (FixedSchedule) => FixedSchedule.id, {
+    nullable: true,
+  })
+  fixedSchedule: FixedSchedule;
+
+  @OneToMany(() => ScheduleTemp, (ScheduleTemp) => ScheduleTemp.id)
+  scheduleTemp: ScheduleTemp[];
+
+  @OneToMany(() => DoctorQueue, (DoctorQueue) => DoctorQueue.id)
+  doctorQueue: DoctorQueue[];
 }

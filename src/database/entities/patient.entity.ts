@@ -9,11 +9,17 @@ import {
 } from 'typeorm';
 import { Auth } from './auth.entitity';
 import { MedicalRecord } from './medicalrecord.entity';
+import { Appointment } from './appointment.entitity';
 
 export enum IdType {
   PASSPORT = 'PASSPORT',
   DRIVER_LICENSE = 'DRIVER_LICENSE',
   NATIONAL_ID = 'NATIONAL_ID',
+}
+
+export enum Gender {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
 }
 
 @Entity()
@@ -23,13 +29,11 @@ export class Patient {
 
   @Column({
     type: 'varchar',
-    length: 100,
   })
   name: string;
 
   @Column({
     type: 'varchar',
-    length: 50,
     nullable: true,
   })
   address: string;
@@ -37,11 +41,11 @@ export class Patient {
   @Column({
     type: 'date',
   })
-  date_of_birth: Date;
+  dateOfBirth: Date;
 
   @Column({
     type: 'enum',
-    enum: ['MALE', 'FEMALE'],
+    enum: Gender,
   })
   gender: string;
 
@@ -49,32 +53,31 @@ export class Patient {
     type: 'enum',
     enum: IdType,
   })
-  id_type: IdType;
+  idType: string;
 
   @Column({
     type: 'varchar',
-    length: 25,
   })
-  id_number: string;
+  idNumber: string;
 
   @Column({
     type: 'varchar',
-    length: 50,
+    nullable: true,
   })
-  id_photo: string;
+  idPhoto: string;
 
   @Column({
-    default: false,
+    default: true,
   })
-  is_deleted: boolean;
+  isActive: boolean;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({
     nullable: true,
   })
-  updated_at: Date;
+  updatedAt: Date;
 
   @OneToOne(() => Auth, (auth) => auth.patient, { nullable: true })
   auth: Auth;
@@ -83,4 +86,7 @@ export class Patient {
     nullable: true,
   })
   medicalRecords: MedicalRecord[];
+
+  @OneToMany(() => Appointment, (appointment) => appointment.id)
+  appointment: Appointment[];
 }

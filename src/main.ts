@@ -4,7 +4,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { WINSTON_MODULE_NEST_PROVIDER, WinstonModule } from 'nest-winston';
 import { logger } from './utils/logger.util';
 import { ConfigService } from '@nestjs/config';
-import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import helmet from 'helmet';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 
@@ -18,7 +17,8 @@ async function bootstrap() {
   const isDev = configService.get<boolean>('isDev');
 
   app.use(helmet());
-  app.enableCors(configService.get<CorsOptions>('cors'));
+  app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
+  app.enableCors();
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -42,7 +42,6 @@ async function bootstrap() {
 
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   app.setGlobalPrefix('v1');
-
   await app.listen(configService.get<number>('port'));
   logger.info(`Backend is running on: ${await app.getUrl()}`);
 }

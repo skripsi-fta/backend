@@ -1,5 +1,7 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Schedule } from './schedule.entity';
+import { FixedSchedule } from './fixedschedule.entity';
+import { ScheduleTemp } from './scheduletemp.entity';
 
 @Entity()
 export class Room {
@@ -8,17 +10,21 @@ export class Room {
 
   @Column({
     type: 'varchar',
-    length: 25,
   })
   name: string;
 
   @Column({
     type: 'varchar',
-    length: 50,
     nullable: true,
   })
   detail: string;
 
-  @OneToMany(() => Schedule, (schedule) => schedule.id, { nullable: true })
+  @OneToMany(() => Schedule, (schedule) => schedule.id)
   schedules: Schedule[];
+
+  @OneToMany(() => ScheduleTemp, (scheduleTemp) => scheduleTemp.id)
+  scheduleTemp: ScheduleTemp[];
+
+  @OneToMany(() => FixedSchedule, (fixedSchedule) => fixedSchedule.id)
+  fixedSchedules: FixedSchedule[];
 }

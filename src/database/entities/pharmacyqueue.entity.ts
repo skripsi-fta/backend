@@ -6,15 +6,19 @@ export class PharmacyQueue {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({
-    type: 'time',
-  })
-  start_time: Date;
+  @Column()
+  queueNumber: number;
 
   @Column({
     type: 'time',
   })
-  finish_time: Date;
+  startTime: Date;
+
+  @Column({
+    type: 'time',
+    nullable: true,
+  })
+  finishTime: Date;
 
   @Column({
     type: 'date',

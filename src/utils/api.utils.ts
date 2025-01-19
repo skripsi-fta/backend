@@ -8,6 +8,8 @@ export interface APIResponse {
   statusCode?: StatusCodes;
   message: string;
   totalRows?: number;
+  pageSize?: number;
+  pageNumber?: number;
   data?: unknown;
 }
 
@@ -17,10 +19,15 @@ export function sendResponse(res: Response, params: APIResponse) {
   const code = statusCode ?? StatusCodes.OK;
 
   const response = {
+    statusCode: code,
     ...newParams,
   };
 
   return res.status(code).json(response);
+}
+
+export function sendImage(res: Response, type: string, image: Buffer) {
+  return res.status(StatusCodes.OK).set('Content-Type', type).send(image);
 }
 
 export class ResponseError extends Error {

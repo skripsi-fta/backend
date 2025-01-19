@@ -3,13 +3,19 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Schedule } from './schedule.entity';
 import { Doctor } from './doctor.entity';
+
+export enum StaffRole {
+  DOCTOR = 'DOCTOR',
+  PHARMACIST = 'PHARMACIST',
+  CASHIER = 'CASHIER',
+  MANAGEMENT = 'MANAGEMENT',
+  MONITORING = 'MONITORING',
+}
 
 @Entity()
 export class Staff {
@@ -18,46 +24,39 @@ export class Staff {
 
   @Column({
     type: 'varchar',
-    length: 25,
   })
   username: string;
 
   @Column({
     type: 'varchar',
-    length: 50,
   })
   name: string;
 
   @Column({
     type: 'varchar',
-    length: 50,
   })
   email: string;
 
   @Column({
     type: 'varchar',
-    length: 50,
   })
   password: string;
 
   @Column({
     type: 'enum',
-    enum: ['DOCTOR', 'NURSE', 'PHARMACIST', 'RECEPTIONIST', 'ADMIN'],
+    enum: StaffRole,
   })
   role: string;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({
     nullable: true,
   })
-  updated_at: Date;
+  updatedAt: Date;
 
   @OneToOne(() => Doctor, (doctor) => doctor.id, { nullable: true })
   @JoinColumn()
   doctor: Doctor;
-
-  @OneToMany(() => Schedule, (schedule) => schedule.id, { nullable: true })
-  schedules: Schedule[];
 }

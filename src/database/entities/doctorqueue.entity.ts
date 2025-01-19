@@ -1,12 +1,13 @@
 import {
   Column,
   Entity,
-  OneToMany,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Appointment } from './appointment.entitity';
 import { Doctor } from './doctor.entity';
+import { Schedule } from './schedule.entity';
 
 @Entity()
 export class DoctorQueue {
@@ -14,26 +15,30 @@ export class DoctorQueue {
   id: number;
 
   @Column()
-  queue_number: number;
+  queueNumber: number;
 
   @Column({
     type: 'time',
   })
-  start_time: Date;
+  startTime: Date;
 
   @Column({
     type: 'time',
+    nullable: true,
   })
-  finish_time: Date;
+  finishTime: Date;
 
   @Column({
     type: 'date',
   })
   date: Date;
 
-  @OneToMany(() => Doctor, (doctor) => doctor.id)
+  @ManyToOne(() => Doctor, (doctor) => doctor.doctorQueue)
   doctor: Doctor;
 
   @OneToOne(() => Appointment, (appointment) => appointment.id)
   appointment: Appointment;
+
+  @ManyToOne(() => Schedule, (schedule) => schedule.doctorQueue)
+  schedule: Schedule;
 }

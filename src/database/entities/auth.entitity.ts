@@ -19,19 +19,19 @@ export class Auth {
   })
   email: string;
 
-  @Column()
-  phone_number: string;
+  @Column({ nullable: true })
+  phoneNumber: string;
 
   @Column()
   password: string;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({
     nullable: true,
   })
-  updated_at: Date;
+  updatedAt: Date;
 
   @OneToOne(() => Patient, (patient) => patient.id, { nullable: true })
   @JoinColumn()

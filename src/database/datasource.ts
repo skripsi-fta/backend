@@ -12,9 +12,11 @@ import { Staff } from './entities/staff.entity';
 import { Room } from './entities/room.entity';
 import { Schedule } from './entities/schedule.entity';
 import { Auth } from './entities/auth.entitity';
-import { TimeSlot } from './entities/timeslot.entitity';
 import { Doctor } from './entities/doctor.entity';
-import { Speciality } from './entities/speciality.entity';
+import { Specialization } from './entities/specialization.entity';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import { FixedSchedule } from './entities/fixedschedule.entity';
+import { ScheduleTemp } from './entities/scheduletemp.entity';
 
 const dataSource = (configService: ConfigService) => ({
   ...configService.get<TypeOrmModuleOptions>('db'),
@@ -30,16 +32,17 @@ const dataSource = (configService: ConfigService) => ({
     Staff,
     Room,
     Schedule,
-    TimeSlot,
     Auth,
     Doctor,
     Staff,
-    Speciality,
+    Specialization,
+    FixedSchedule,
+    ScheduleTemp,
   ],
   subscribers: [],
   migrations: [],
   synchronize: true,
-  logging: true,
+  namingStrategy: new SnakeNamingStrategy(),
 });
 
 export default dataSource;

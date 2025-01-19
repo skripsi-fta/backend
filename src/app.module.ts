@@ -1,21 +1,26 @@
 import {
   Logger,
-  MiddlewareConsumer,
   Module,
-  NestModule,
+  type MiddlewareConsumer,
+  type NestModule,
   RequestMethod,
 } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 import { loggerData } from './utils/logger.util';
-import { LoggerMiddleware } from './middleware/logger.middleware';
 import { HealthcheckModule } from './module/healthcheck/healthcheck.module';
 import { LoggerModule } from './module/logger/logger.module';
 import config from './config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { StaffModule } from './module/staff/staff.module';
 import dataSource from './database/datasource';
+import { DashboardModule } from './module/dashboard/dashboard.module';
+import { LoggerMiddleware } from './middleware/logger.middleware';
+import { ScheduleModule } from '@nestjs/schedule';
+import { MobileModule } from './module/mobile/mobile.module';
+import { StorageModule } from './module/storage/storage.module';
+import { LivequeueModule } from './module/dashboard/livequeue/livequeue.module';
+import { InitDatabaseModule } from './database/init/init.module';
 
 @Module({
   imports: [
@@ -32,7 +37,12 @@ import dataSource from './database/datasource';
     WinstonModule.forRoot(loggerData),
     HealthcheckModule,
     LoggerModule,
-    StaffModule,
+    DashboardModule,
+    MobileModule,
+    ScheduleModule.forRoot(),
+    StorageModule,
+    LivequeueModule,
+    InitDatabaseModule,
   ],
   controllers: [AppController],
   providers: [Logger],

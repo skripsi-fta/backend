@@ -42,12 +42,10 @@ export class MedicalRecord {
     length: 150,
     nullable: true,
   })
-  diagnosis_doctor: string;
+  diagnosisDoctor: string;
 
-  @Column({
-    nullable: true,
-  })
-  prescription: string;
+  @Column('text', { nullable: true, array: true })
+  prescription: string[];
 
   @Column({
     type: 'varchar',
@@ -57,10 +55,10 @@ export class MedicalRecord {
   notes: string;
 
   @CreateDateColumn()
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updatedAt: Date;
 
   @ManyToOne(() => Patient, (patient) => patient.id)
   patient: Patient;
